@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "503484802067",
+    "firebase_url": "https://easy-wheels-front-end.firebaseio.com",
+    "project_id": "easy-wheels-front-end",
+    "storage_bucket": "easy-wheels-front-end.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503484802067:android:7f641ba844c24053",
+        "android_client_info": {
+          "package_name": "com.ieti.easywheels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "503484802067-hsu3rmecoeijag907g9degsejsm8bues.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ieti.easywheels",
+            "certificate_hash": "9cccc3a919f9ebf36a3aab04798236026d3d4829"
+          }
+        },
+        {
+          "client_id": "503484802067-vgufuket90hhg6t0o32t36opje21tjp0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8eotv1FPgLtrzHgBLXYF01cA5DmGh-FI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "503484802067-vgufuket90hhg6t0o32t36opje21tjp0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
