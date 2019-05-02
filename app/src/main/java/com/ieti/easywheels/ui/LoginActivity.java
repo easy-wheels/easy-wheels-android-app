@@ -86,13 +86,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
-
         if (!validateEmail() && !validatePassword()) {
             return;
         }
 
-
-        // [START sign_in_with_email]
         Firebase.getFAuth().signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -108,21 +105,12 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = Firebase.getFAuth().getCurrentUser();
                             updateUI(user);
                         }
-
-                        // [START_EXCLUDE]
-                        if (!task.isSuccessful()) {
-
-                        }
-
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END sign_in_with_email]
     }
 
     private void updateUI(FirebaseUser user) {
-
-        if (user != null) {
+        if (user == null) {
             buildDialog(getApplicationContext().getResources().getString(R.string.login_failed_dialog_message));
             alertDialog.show();
         } else {
@@ -131,11 +119,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(View v) {
-
         v.setEnabled(false);
         signIn(textInputEmail.getEditText().getText().toString(), textInputPassword.getEditText().getText().toString());
         v.setEnabled(true);
-
-
     }
 }
