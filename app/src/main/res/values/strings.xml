@@ -12,10 +12,14 @@
     <string name="menu_slideshow">Slideshow</string>
     <string name="menu_tools">Tools</string>
     <string name="menu_share">Share</string>
-    <string name="menu_send">Send</string>
+    <string name="menu_signout">Cerrar Sesion</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="logo_description">Easy Wheels App</string>
-    <string name="button_loggin">LOGIN</string>
-    <string name="button_create_account">Create Account</string>
+    <string name="button_loggin">Iniciar Sesion</string>
+    <string name="button_create_account">Crear Cuenta</string>
+    <string name="field_validation_empty">El campo no puede estar vacio</string>
+    <string name="field_validation_email">Ingrese una direccion de correo valida</string>
+    <string name="login_failed_dialog_title">Error al iniciar sesion</string>
+    <string name="login_failed_dialog_message">Contraseña o email invalido(s)</string>
 </resources>
