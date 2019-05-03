@@ -1,10 +1,13 @@
 package com.ieti.easywheels.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,9 +20,22 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.network.Firebase;
+import com.ieti.easywheels.ui.steps.DayAndHourStep;
+import com.ieti.easywheels.ui.steps.DestinationStep;
+import com.ieti.easywheels.ui.steps.TypeStep;
+
+import ernestoyaquello.com.verticalstepperform.VerticalStepperFormView;
+import ernestoyaquello.com.verticalstepperform.listener.StepperFormListener;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, StepperFormListener {
+
+    private VerticalStepperFormView stepperFormView;
+
+    private TypeStep typeStep;
+    private DestinationStep destinationStep;
+    private DayAndHourStep dayAndHourStep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,14 +43,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -42,7 +51,12 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+        setTextsOfUser();
+        setVerticalStepper();
     }
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -82,17 +96,15 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
+        if (id == R.id.nav_program_trip) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_program_week) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_wallet) {
 
-        } else if (id == R.id.nav_tools) {
+        } else if (id == R.id.nav_trips) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_signout) {
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -103,4 +115,37 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void setTextsOfUser(){
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View  view=navigationView.getHeaderView(0);
+        TextView name=view.findViewById(R.id.nav_header_name);
+        name.setText(String.valueOf(Firebase.getFAuth().getCurrentUser().getDisplayName()));
+        TextView email=view.findViewById(R.id.nav_header_email);
+        email.setText(String.valueOf(Firebase.getFAuth().getCurrentUser().getEmail()));
+    }
+
+    private void setVerticalStepper() {
+        typeStep = new TypeStep("Modalidad");
+        destinationStep = new DestinationStep("Destino");
+        dayAndHourStep = new DayAndHourStep("Dia y Hora");
+
+        stepperFormView = findViewById(R.id.stepper_form);
+        stepperFormView
+                .setup(this,typeStep,destinationStep,dayAndHourStep)
+                .init();
+    }
+
+    @Override
+    public void onCompletedForm() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onCancelledForm() {
+
+    }
+
+
 }
