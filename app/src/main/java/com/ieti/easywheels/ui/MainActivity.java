@@ -21,9 +21,21 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.network.Firebase;
+import com.ieti.easywheels.ui.steps.DayAndHourStep;
+import com.ieti.easywheels.ui.steps.DestinationStep;
+import com.ieti.easywheels.ui.steps.TypeStep;
+
+import ernestoyaquello.com.verticalstepperform.VerticalStepperFormView;
+import ernestoyaquello.com.verticalstepperform.listener.StepperFormListener;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, StepperFormListener {
+
+    private VerticalStepperFormView stepperFormView;
+
+    private TypeStep typeStep;
+    private DestinationStep destinationStep;
+    private DayAndHourStep dayAndHourStep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +43,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -48,7 +52,10 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         setTextsOfUser();
+        setVerticalStepper();
     }
+
+
 
 
     @Override
@@ -117,4 +124,28 @@ public class MainActivity extends AppCompatActivity
         TextView email=view.findViewById(R.id.nav_header_email);
         email.setText(String.valueOf(Firebase.getFAuth().getCurrentUser().getEmail()));
     }
+
+    private void setVerticalStepper() {
+        typeStep = new TypeStep("Modalidad");
+        destinationStep = new DestinationStep("Destino");
+        dayAndHourStep = new DayAndHourStep("Dia y Hora");
+
+        stepperFormView = findViewById(R.id.stepper_form);
+        stepperFormView
+                .setup(this,typeStep,destinationStep,dayAndHourStep)
+                .init();
+    }
+
+    @Override
+    public void onCompletedForm() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onCancelledForm() {
+
+    }
+
+
 }
