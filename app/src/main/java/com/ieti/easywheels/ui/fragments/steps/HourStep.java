@@ -1,18 +1,22 @@
-package com.ieti.easywheels.ui.steps;
+package com.ieti.easywheels.ui.fragments.steps;
 
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.jaredrummler.materialspinner.MaterialSpinner;
+
 import ernestoyaquello.com.verticalstepperform.Step;
 
-public class DestinationStep extends Step<String> {
-    private EditText userNameView;
-
-    public DestinationStep(String title) {
+public class HourStep extends Step<String> {
+    public HourStep(String title) {
         super(title);
     }
+
+    private EditText userNameView;
+    private MaterialSpinner materialSpinner;
 
     @Override
     protected View createStepContentLayout() {
@@ -43,14 +47,23 @@ public class DestinationStep extends Step<String> {
             }
         });
 
-        return userNameView;
+        materialSpinner = new MaterialSpinner(getContext());
+        materialSpinner.setItems("7:00","8:30","10:00","11:30","13:00","14:30","16:00","17:30","19:00");
+        materialSpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+        return materialSpinner;
     }
 
     @Override
     public String getStepData() {
         // We get the step's data from the value that the user has typed in the EditText view.
-        Editable userName = userNameView.getText();
-        return userName != null ? userName.toString() : "";
+        String selected = materialSpinner.getItems().get(materialSpinner.getSelectedIndex()).toString();
+        return selected;
     }
 
     @Override

@@ -12,23 +12,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.network.Firebase;
-import com.ieti.easywheels.ui.steps.DayStep;
-import com.ieti.easywheels.ui.steps.DestinationStep;
-import com.ieti.easywheels.ui.steps.HourStep;
-import com.ieti.easywheels.ui.steps.TypeStep;
+import com.ieti.easywheels.ui.fragments.ProgramTripFragment;
+import com.ieti.easywheels.ui.fragments.ProgramWeekFragment;
+import com.ieti.easywheels.ui.fragments.TripsFragment;
+import com.ieti.easywheels.ui.fragments.WalletFragment;
+import com.ieti.easywheels.ui.fragments.steps.DayStep;
+import com.ieti.easywheels.ui.fragments.steps.DestinationStep;
+import com.ieti.easywheels.ui.fragments.steps.HourStep;
+import com.ieti.easywheels.ui.fragments.steps.TypeStep;
 
 import ernestoyaquello.com.verticalstepperform.VerticalStepperFormView;
-import ernestoyaquello.com.verticalstepperform.listener.StepperFormListener;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, StepperFormListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     private VerticalStepperFormView stepperFormView;
+    private FragmentTransaction fragmentTransaction;
 
     private TypeStep typeStep;
     private DestinationStep destinationStep;
@@ -44,13 +49,17 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setCheckedItem(R.id.nav_program_trip);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         setTextsOfUser();
-        setVerticalStepper();
+        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.add(R.id.main_container,new ProgramTripFragment());
+        fragmentTransaction.commit();
+        getSupportActionBar().setTitle("Programa Tu viaje");
     }
 
 
@@ -95,13 +104,25 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_program_trip) {
-            // Handle the camera action
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.main_container,new ProgramTripFragment());
+            fragmentTransaction.commit();
+            getSupportActionBar().setTitle("Programa Tu viaje");
         } else if (id == R.id.nav_program_week) {
-
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.main_container,new ProgramWeekFragment());
+            fragmentTransaction.commit();
+            getSupportActionBar().setTitle("Tu Semana");
         } else if (id == R.id.nav_wallet) {
-
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.main_container,new WalletFragment());
+            fragmentTransaction.commit();
+            getSupportActionBar().setTitle("Monedero");
         } else if (id == R.id.nav_trips) {
-
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.main_container,new TripsFragment());
+            fragmentTransaction.commit();
+            getSupportActionBar().setTitle("Viajes");
         } else if (id == R.id.nav_signout) {
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(this, LoginActivity.class);
@@ -110,7 +131,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        drawer.closeDrawers();
         return true;
     }
 
@@ -123,28 +144,7 @@ public class MainActivity extends AppCompatActivity
         email.setText(String.valueOf(Firebase.getFAuth().getCurrentUser().getEmail()));
     }
 
-    private void setVerticalStepper() {
-        typeStep = new TypeStep("Modalidad");
-        destinationStep = new DestinationStep("Destino");
-        dayStep = new DayStep("Dia");
-        hourStep = new HourStep("Hora");
 
-        stepperFormView = findViewById(R.id.stepper_form);
-        stepperFormView
-                .setup(this,typeStep,destinationStep, dayStep, hourStep)
-                .init();
-    }
-
-    @Override
-    public void onCompletedForm() {
-        Intent intent = new Intent(this, MapsActivity.class);
-        startActivity(intent);
-    }
-
-    @Override
-    public void onCancelledForm() {
-
-    }
 
 
 }
