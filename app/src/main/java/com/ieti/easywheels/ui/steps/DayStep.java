@@ -5,16 +5,20 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.jaredrummler.materialspinner.MaterialSpinner;
+
 import ernestoyaquello.com.verticalstepperform.Step;
 
-public class DayAndHourStep extends Step<String> {
+public class DayStep extends Step<String> {
 
 
-    public DayAndHourStep(String title) {
+    public DayStep(String title) {
         super(title);
     }
 
     private EditText userNameView;
+    private MaterialSpinner materialSpinner;
 
     @Override
     protected View createStepContentLayout() {
@@ -45,14 +49,24 @@ public class DayAndHourStep extends Step<String> {
             }
         });
 
-        return userNameView;
+        materialSpinner = new MaterialSpinner(getContext());
+        materialSpinner.setItems("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado");
+        materialSpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+
+        return materialSpinner;
     }
 
     @Override
     public String getStepData() {
         // We get the step's data from the value that the user has typed in the EditText view.
-        Editable userName = userNameView.getText();
-        return userName != null ? userName.toString() : "";
+        String selected = materialSpinner.getItems().get(materialSpinner.getSelectedIndex()).toString();
+        return selected;
     }
 
     @Override
