@@ -1,9 +1,7 @@
 package com.ieti.easywheels.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,14 +13,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.network.Firebase;
-import com.ieti.easywheels.ui.steps.DayAndHourStep;
+import com.ieti.easywheels.ui.steps.DayStep;
 import com.ieti.easywheels.ui.steps.DestinationStep;
+import com.ieti.easywheels.ui.steps.HourStep;
 import com.ieti.easywheels.ui.steps.TypeStep;
 
 import ernestoyaquello.com.verticalstepperform.VerticalStepperFormView;
@@ -35,7 +32,8 @@ public class MainActivity extends AppCompatActivity
 
     private TypeStep typeStep;
     private DestinationStep destinationStep;
-    private DayAndHourStep dayAndHourStep;
+    private DayStep dayStep;
+    private HourStep hourStep;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,11 +126,12 @@ public class MainActivity extends AppCompatActivity
     private void setVerticalStepper() {
         typeStep = new TypeStep("Modalidad");
         destinationStep = new DestinationStep("Destino");
-        dayAndHourStep = new DayAndHourStep("Dia y Hora");
+        dayStep = new DayStep("Dia");
+        hourStep = new HourStep("Hora");
 
         stepperFormView = findViewById(R.id.stepper_form);
         stepperFormView
-                .setup(this,typeStep,destinationStep,dayAndHourStep)
+                .setup(this,typeStep,destinationStep, dayStep, hourStep)
                 .init();
     }
 
