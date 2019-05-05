@@ -1,4 +1,4 @@
-package com.ieti.easywheels.ui.steps;
+package com.ieti.easywheels.ui.fragments.steps;
 
 import android.text.Editable;
 import android.text.TextWatcher;

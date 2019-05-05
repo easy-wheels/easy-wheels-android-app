@@ -1,4 +1,4 @@
-package com.ieti.easywheels.ui.steps;
+package com.ieti.easywheels.ui.fragments.steps;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -7,14 +7,11 @@ import android.widget.EditText;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
-public class TypeStep extends Step<String> {
-
-
+public class DestinationStep extends Step<String> {
     private EditText userNameView;
 
-    public TypeStep(String stepTitle){
-        super(stepTitle);
-
+    public DestinationStep(String title) {
+        super(title);
     }
 
     @Override
