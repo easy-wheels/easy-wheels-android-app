@@ -3,7 +3,13 @@ package com.ieti.easywheels.ui.fragments.steps;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+
+import com.ieti.easywheels.R;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
@@ -11,6 +17,8 @@ public class TypeStep extends Step<String> {
 
 
     private EditText userNameView;
+    private RadioButton passangerRadioButton;
+    private RadioButton driverRadioButton;
 
     public TypeStep(String stepTitle){
         super(stepTitle);
@@ -21,9 +29,32 @@ public class TypeStep extends Step<String> {
     protected View createStepContentLayout() {
         // Here we generate the view that will be used by the library as the content of the step.
         // In this case we do it programmatically, but we could also do it by inflating an XML layout.
+        RadioGroup radioGroup = new RadioGroup(getContext());
+
+        // Create Checkbox Dynamically
+        passangerRadioButton = new RadioButton(getContext());
+        passangerRadioButton.setText(getContext().getResources().getString(R.string.passanger_radiobutton_text));
+        passangerRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        radioGroup.addView(passangerRadioButton);
+
+        driverRadioButton = new RadioButton(getContext());
+        driverRadioButton.setText(getContext().getResources().getString(R.string.driver_radiobutton_text));
+        driverRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        radioGroup.addView(driverRadioButton);
+
+
+
+
+
+
+
+
+
+
         userNameView = new EditText(getContext());
         userNameView.setSingleLine(true);
         userNameView.setHint("Your Name");
+
 
         userNameView.addTextChangedListener(new TextWatcher() {
 
@@ -46,7 +77,7 @@ public class TypeStep extends Step<String> {
             }
         });
 
-        return userNameView;
+        return radioGroup;
     }
 
     @Override
