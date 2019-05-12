@@ -1,59 +1,73 @@
 package com.ieti.easywheels.ui.fragments.steps;
 
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.EditText;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+
+import androidx.annotation.NonNull;
+
+import com.ieti.easywheels.R;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
 public class TypeStep extends Step<String> {
 
 
-    private EditText userNameView;
+    private RadioButton passangerRadioButton;
+    private RadioButton driverRadioButton;
+    private final int DRIVER_RADIO_BUTTON_ID = 7;
+    private final int PASSANGER_RADIO_BUTTON_ID = 8;
+    private int checkedRadioButtonId;
 
-    public TypeStep(String stepTitle){
+    public TypeStep(String stepTitle) {
         super(stepTitle);
 
     }
 
+    @NonNull
     @Override
     protected View createStepContentLayout() {
         // Here we generate the view that will be used by the library as the content of the step.
         // In this case we do it programmatically, but we could also do it by inflating an XML layout.
-        userNameView = new EditText(getContext());
-        userNameView.setSingleLine(true);
-        userNameView.setHint("Your Name");
+        RadioGroup radioGroup = new RadioGroup(getContext());
 
-        userNameView.addTextChangedListener(new TextWatcher() {
+        passangerRadioButton = new RadioButton(getContext());
+        passangerRadioButton.setId(PASSANGER_RADIO_BUTTON_ID);
+        passangerRadioButton.setText(getContext().getResources().getString(R.string.passanger_radiobutton_text));
+        passangerRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        radioGroup.addView(passangerRadioButton);
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Whenever the user updates the user name text, we update the state of the step.
-                // The step will be marked as completed only if its data is valid, which will be
-                // checked automatically by the form with a call to isStepDataValid().
+        driverRadioButton = new RadioButton(getContext());
+        driverRadioButton.setId(DRIVER_RADIO_BUTTON_ID);
+        driverRadioButton.setText(getContext().getResources().getString(R.string.driver_radiobutton_text));
+        driverRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        radioGroup.addView(driverRadioButton);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // This will get the radiobutton that has changed in its check state
+                RadioButton checkedRadioButton = group.findViewById(checkedId);
+                // This puts the value (true/false) into the variable
+                boolean isChecked = checkedRadioButton.isChecked();
+                checkedRadioButtonId = checkedId;
                 markAsCompletedOrUncompleted(true);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
             }
         });
 
-        return userNameView;
+
+        return radioGroup;
     }
 
     @Override
     public String getStepData() {
-        // We get the step's data from the value that the user has typed in the EditText view.
-        Editable userName = userNameView.getText();
-        return userName != null ? userName.toString() : "";
+        String checkedRadioButtonText = null;
+        if (checkedRadioButtonId == DRIVER_RADIO_BUTTON_ID) {
+            checkedRadioButtonText = getContext().getResources().getString(R.string.driver_radiobutton_text);
+        } else if (checkedRadioButtonId == PASSANGER_RADIO_BUTTON_ID) {
+            checkedRadioButtonText = getContext().getResources().getString(R.string.passanger_radiobutton_text);
+        }
+        return checkedRadioButtonText != null ? checkedRadioButtonText : "";
     }
 
     @Override
@@ -61,21 +75,25 @@ public class TypeStep extends Step<String> {
         // Because the step's data is already a human-readable string, we don't need to convert it.
         // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
-        String userName = getStepData();
-        return !userName.isEmpty() ? userName : "(Empty)";
+        String type = getStepData();
+        return !type.isEmpty() ? type : "(Empty)";
     }
 
     @Override
     public void restoreStepData(String stepData) {
-        // To restore the step after a configuration change, we restore the text of its EditText view.
-        userNameView.setText(stepData);
+        passangerRadioButton.setChecked(false);
+        driverRadioButton.setChecked(false);
     }
 
     @Override
     protected IsDataValid isStepDataValid(String stepData) {
-        return null;
+        if (checkedRadioButtonId != PASSANGER_RADIO_BUTTON_ID && checkedRadioButtonId != DRIVER_RADIO_BUTTON_ID) {
+            String titleError = getContext().getString(R.string.type_of_usser_step_error);
+            return new IsDataValid(false, titleError);
+        } else {
+            return new IsDataValid(true);
+        }
     }
-
 
 
     @Override
