@@ -29,7 +29,14 @@
     <string name="login_failed_dialog_message">Contraseña o email invalido(s)</string>
     <string name="title_activity_maps">Map</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="passanger_radiobutton_text">Soy pasajero</string>
+    <string name="driver_radiobutton_text">Soy conductor</string>
+    <string name="type_of_usser_step_error">Debes seleccionar el rol que desempeñarás.</string>
+    <string name="passanger_type_step_title">Cual sera tu rol en este viaje?</string>
+    <string name="destination_step_title">A donde te diriges?</string>
+    <string name="to_univerdsity_radiobutton_text">Hacia la univeridad</string>
+    <string name="from_university_radiobutton_text">Desde la universidad</string>
+    <string name="destination_step_error">Debes elegir tu destino</string>
 
 </resources>

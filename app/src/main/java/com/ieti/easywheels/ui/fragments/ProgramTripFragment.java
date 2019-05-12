@@ -3,12 +3,11 @@ package com.ieti.easywheels.ui.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.fragment.app.Fragment;
 
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.ui.MapsActivity;
@@ -40,8 +39,8 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        typeStep = new TypeStep("Modalidad");
-        destinationStep = new DestinationStep("Destino");
+        typeStep = new TypeStep(getContext().getString(R.string.passanger_type_step_title));
+        destinationStep = new DestinationStep(getContext().getString(R.string.destination_step_title));
         dayStep = new DayStep("Dia");
         hourStep = new HourStep("Hora");
 
