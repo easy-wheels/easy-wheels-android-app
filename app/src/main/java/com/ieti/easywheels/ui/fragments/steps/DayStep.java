@@ -2,11 +2,13 @@ package com.ieti.easywheels.ui.fragments.steps;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.jaredrummler.materialspinner.MaterialSpinner;
+import com.ieti.easywheels.R;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
@@ -18,13 +20,14 @@ public class DayStep extends Step<String> {
     }
 
     private EditText userNameView;
-    private MaterialSpinner materialSpinner;
+    private Spinner materialSpinner;
 
     @Override
     protected View createStepContentLayout() {
         // Here we generate the view that will be used by the library as the content of the step.
         // In this case we do it programmatically, but we could also do it by inflating an XML layout.
         userNameView = new EditText(getContext());
+
         userNameView.setSingleLine(true);
         userNameView.setHint("Your Name");
 
@@ -49,14 +52,12 @@ public class DayStep extends Step<String> {
             }
         });
 
-        materialSpinner = new MaterialSpinner(getContext());
-        materialSpinner.setItems("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado");
-        materialSpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
-            }
-        });
+        materialSpinner = new Spinner(new ContextThemeWrapper(getContext(), R.style.Theme_MaterialComponents_CompactMenu));
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.days_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        materialSpinner.setAdapter(adapter);
 
 
         return materialSpinner;
@@ -65,8 +66,8 @@ public class DayStep extends Step<String> {
     @Override
     public String getStepData() {
         // We get the step's data from the value that the user has typed in the EditText view.
-        String selected = materialSpinner.getItems().get(materialSpinner.getSelectedIndex()).toString();
-        return selected;
+
+        return null;
     }
 
     @Override
@@ -74,8 +75,8 @@ public class DayStep extends Step<String> {
         // Because the step's data is already a human-readable string, we don't need to convert it.
         // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
-        String userName = getStepData();
-        return !userName.isEmpty() ? userName : "(Empty)";
+        String userName = null;
+        return userName != null ? userName : "(Empty)";
     }
 
     @Override

@@ -39,9 +39,9 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        typeStep = new TypeStep(getContext().getString(R.string.passanger_type_step_title));
+        typeStep = new TypeStep(this, getContext().getString(R.string.passanger_type_step_title));
         destinationStep = new DestinationStep(getContext().getString(R.string.destination_step_title));
-        dayStep = new DayStep("Dia");
+        dayStep = new DayStep(getContext().getString(R.string.day_step_title));
         hourStep = new HourStep("Hora");
 
         View myFragmentView = inflater.inflate(R.layout.fragment_program_trip,container,false);
@@ -62,5 +62,9 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
     @Override
     public void onCancelledForm() {
 
+    }
+
+    public void addCapacityStep() {
+        stepperFormView.setup(this, typeStep, destinationStep, dayStep, hourStep).init();
     }
 }

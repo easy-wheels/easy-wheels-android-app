@@ -9,6 +9,7 @@ import android.widget.RadioGroup;
 import androidx.annotation.NonNull;
 
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.ui.fragments.ProgramTripFragment;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
@@ -20,9 +21,11 @@ public class TypeStep extends Step<String> {
     private final int DRIVER_RADIO_BUTTON_ID = 7;
     private final int PASSANGER_RADIO_BUTTON_ID = 8;
     private int checkedRadioButtonId;
+    private ProgramTripFragment stepper;
 
-    public TypeStep(String stepTitle) {
+    public TypeStep(ProgramTripFragment st, String stepTitle) {
         super(stepTitle);
+        this.stepper = stepper;
 
     }
 
@@ -98,12 +101,13 @@ public class TypeStep extends Step<String> {
 
     @Override
     protected void onStepOpened(boolean animated) {
-
     }
 
     @Override
     protected void onStepClosed(boolean animated) {
-
+        if (driverRadioButton.isChecked()) {
+            stepper.addCapacityStep();
+        }
     }
 
     @Override
