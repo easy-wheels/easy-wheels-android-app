@@ -23,7 +23,7 @@ public class LaunchActivity extends AppCompatActivity {
             startActivity(intent);
         }
         //Firebase.addTripRequest(Firebase.getFAuth().getCurrentUser().getEmail(),"Monday","7:00", true);
-        Firebase.getMatchedTripsRequestByEmail();
+        //Firebase.getMatchedTripsRequestByEmail();
         finish();
     }
 }
