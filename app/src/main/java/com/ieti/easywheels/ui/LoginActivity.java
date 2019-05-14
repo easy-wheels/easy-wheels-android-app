@@ -123,4 +123,9 @@ public class LoginActivity extends AppCompatActivity {
         signIn(textInputEmail.getEditText().getText().toString(), textInputPassword.getEditText().getText().toString());
         v.setEnabled(true);
     }
+
+    public void createAccount(View v){
+        Intent intent = new Intent(this, CreateAccountActivity.class);
+        startActivity(intent);
+    }
 }

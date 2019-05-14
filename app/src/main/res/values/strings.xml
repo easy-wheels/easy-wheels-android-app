@@ -38,5 +38,7 @@
     <string name="to_univerdsity_radiobutton_text">Hacia la univeridad</string>
     <string name="from_university_radiobutton_text">Desde la universidad</string>
     <string name="destination_step_error">Debes elegir tu destino</string>
+    <string name="name">Nombre</string>
+    <string name="repassword">Re-type Password</string>
 
 </resources>
