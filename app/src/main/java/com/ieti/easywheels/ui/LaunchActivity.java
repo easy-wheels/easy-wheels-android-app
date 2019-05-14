@@ -22,6 +22,8 @@ public class LaunchActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+        //Firebase.addTripRequest(Firebase.getFAuth().getCurrentUser().getEmail(),"Monday","7:00", true);
+        Firebase.getMatchedTripsRequestByEmail();
         finish();
     }
 }
