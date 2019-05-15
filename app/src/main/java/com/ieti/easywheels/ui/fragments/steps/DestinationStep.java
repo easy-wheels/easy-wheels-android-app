@@ -70,7 +70,7 @@ public class DestinationStep extends Step<String> {
         // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
         String type = getStepData();
-        return !type.isEmpty() ? type : "(Empty)";
+        return !type.isEmpty() ? type : getContext().getString(R.string.empty_step);
     }
 
     @Override
