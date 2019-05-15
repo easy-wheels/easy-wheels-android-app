@@ -114,7 +114,13 @@ public class LoginActivity extends AppCompatActivity {
             buildDialog(getApplicationContext().getResources().getString(R.string.login_failed_dialog_message));
             alertDialog.show();
         } else {
-            switchToMainView();
+            if(user.isEmailVerified()){
+                switchToMainView();
+            }else{
+                Firebase.getFAuth().signOut();
+                buildDialog(getApplicationContext().getResources().getString(R.string.email_verification_failed_dialog_message));
+                alertDialog.show();
+            }
         }
     }
 
@@ -122,5 +128,10 @@ public class LoginActivity extends AppCompatActivity {
         v.setEnabled(false);
         signIn(textInputEmail.getEditText().getText().toString(), textInputPassword.getEditText().getText().toString());
         v.setEnabled(true);
+    }
+
+    public void createAccount(View v){
+        Intent intent = new Intent(this, CreateAccountActivity.class);
+        startActivity(intent);
     }
 }
