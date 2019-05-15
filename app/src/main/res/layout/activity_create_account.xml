@@ -108,13 +108,14 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/create_button"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="282dp"
         android:layout_height="52dp"
         android:layout_marginStart="64dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="64dp"
+        android:onClick="createAccount"
         android:text="@string/button_create_account"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textSize="18sp"

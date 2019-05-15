@@ -40,5 +40,11 @@
     <string name="destination_step_error">Debes elegir tu destino</string>
     <string name="name">Nombre</string>
     <string name="repassword">Re-type Password</string>
+    <string name="bad_email">Debe ingresar con el correo de la universidad</string>
+    <string name="inequal_password">Las contraseñas no son iguales</string>
+    <string name="sended_email">Se ha enviado un correo para verificar la cuenta</string>
+    <string name="wait">Espere Porfavor</string>
+    <string name="email_verification_failed_dialog_message">No ha verificado su email</string>
+    <string name="create_account_dialog_title">Creacion de cuenta</string>
 
 </resources>
