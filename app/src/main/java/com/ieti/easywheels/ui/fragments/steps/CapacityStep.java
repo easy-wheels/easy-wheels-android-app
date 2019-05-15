@@ -1,110 +1,80 @@
 package com.ieti.easywheels.ui.fragments.steps;
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.fragment.app.Fragment;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.ieti.easywheels.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link CapacityStep.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link CapacityStep#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CapacityStep extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import ernestoyaquello.com.verticalstepperform.Step;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class CapacityStep extends Step<Integer> {
 
-    private OnFragmentInteractionListener mListener;
+    private Spinner materialSpinner;
 
-    public CapacityStep() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CapacityStep.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CapacityStep newInstance(String param1, String param2) {
-        CapacityStep fragment = new CapacityStep();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public CapacityStep(String title) {
+        super(title);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    protected View createStepContentLayout() {
+
+
+        materialSpinner = new Spinner(new ContextThemeWrapper(getContext(), R.style.Theme_MaterialComponents_CompactMenu));
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.days_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        materialSpinner.setAdapter(adapter);
+
+
+        return materialSpinner;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_capacity_step, container, false);
-    }
+    public Integer getStepData() {
+        // We get the step's data from the value that the user has typed in the EditText view.
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        return null;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    public String getStepDataAsHumanReadableString() {
+        // Because the step's data is already a human-readable string, we don't need to convert it.
+        // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
+        // This string will be displayed in the subtitle of the step whenever the step gets closed.
+        String selection = null;
+        return selection != null ? selection : getContext().getString(R.string.empty_step);
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public void restoreStepData(Integer data) {
+
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    @Override
+    protected IsDataValid isStepDataValid(Integer stepData) {
+        return null;
+    }
+
+
+    @Override
+    protected void onStepOpened(boolean animated) {
+
+    }
+
+    @Override
+    protected void onStepClosed(boolean animated) {
+
+    }
+
+    @Override
+    protected void onStepMarkedAsCompleted(boolean animated) {
+
+    }
+
+    @Override
+    protected void onStepMarkedAsUncompleted(boolean animated) {
+
     }
 }
