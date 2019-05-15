@@ -10,7 +10,7 @@
          You don't need to add them explicitly to your manifest
          android.permission.INTERNET or android.permission.ACCESS_NETWORK_STATE
     -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
