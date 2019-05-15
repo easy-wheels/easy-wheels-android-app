@@ -38,6 +38,7 @@
     <string name="to_univerdsity_radiobutton_text">Salgo de la univeridad</string>
     <string name="from_university_radiobutton_text">Voy hacia la universidad</string>
     <string name="destination_step_error">Debes elegir tu destino</string>
+
     <string name="day_step_title">Que día realizaras tu viaje?</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -73,6 +74,15 @@
         <item>5:30 PM</item>
         <item>7:00 PM</item>
     </string-array>
+
+    <string name="name">Nombre</string>
+    <string name="repassword">Re-type Password</string>
+    <string name="bad_email">Debe ingresar con el correo de la universidad</string>
+    <string name="inequal_password">Las contraseñas no son iguales</string>
+    <string name="sended_email">Se ha enviado un correo para verificar la cuenta</string>
+    <string name="wait">Espere Porfavor</string>
+    <string name="email_verification_failed_dialog_message">No ha verificado su email</string>
+    <string name="create_account_dialog_title">Creacion de cuenta</string>
 
 
 </resources>
