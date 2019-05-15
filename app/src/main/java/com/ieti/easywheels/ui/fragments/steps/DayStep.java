@@ -1,12 +1,11 @@
 package com.ieti.easywheels.ui.fragments.steps;
 
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.jaredrummler.materialspinner.MaterialSpinner;
+import com.ieti.easywheels.R;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
@@ -17,56 +16,24 @@ public class DayStep extends Step<String> {
         super(title);
     }
 
-    private EditText userNameView;
-    private MaterialSpinner materialSpinner;
+    private static String[] DAYS = {"Monday", "Thuesday", "Wenesday", "Thursday", "Friday", "Saturday"};
+    private Spinner daySpinner;
 
     @Override
     protected View createStepContentLayout() {
-        // Here we generate the view that will be used by the library as the content of the step.
-        // In this case we do it programmatically, but we could also do it by inflating an XML layout.
-        userNameView = new EditText(getContext());
-        userNameView.setSingleLine(true);
-        userNameView.setHint("Your Name");
+        daySpinner = new Spinner(new ContextThemeWrapper(getContext(), R.style.Theme_MaterialComponents_CompactMenu));
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.days_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        daySpinner.setAdapter(adapter);
 
-        userNameView.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Whenever the user updates the user name text, we update the state of the step.
-                // The step will be marked as completed only if its data is valid, which will be
-                // checked automatically by the form with a call to isStepDataValid().
-                markAsCompletedOrUncompleted(true);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        materialSpinner = new MaterialSpinner(getContext());
-        materialSpinner.setItems("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado");
-        materialSpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
-
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
-            }
-        });
-
-
-        return materialSpinner;
+        return daySpinner;
     }
 
     @Override
     public String getStepData() {
-        // We get the step's data from the value that the user has typed in the EditText view.
-        String selected = materialSpinner.getItems().get(materialSpinner.getSelectedIndex()).toString();
-        return selected;
+
+        return DAYS[daySpinner.getSelectedItemPosition()];
     }
 
     @Override
@@ -74,14 +41,13 @@ public class DayStep extends Step<String> {
         // Because the step's data is already a human-readable string, we don't need to convert it.
         // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
-        String userName = getStepData();
-        return !userName.isEmpty() ? userName : "(Empty)";
+        String selection = daySpinner.getSelectedItem().toString();
+        return selection != null ? selection : getContext().getString(R.string.empty_step);
     }
 
     @Override
     public void restoreStepData(String stepData) {
         // To restore the step after a configuration change, we restore the text of its EditText view.
-        userNameView.setText(stepData);
     }
 
     @Override

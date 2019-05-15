@@ -9,6 +9,7 @@ import android.widget.RadioGroup;
 import androidx.annotation.NonNull;
 
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.ui.fragments.ProgramTripFragment;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
@@ -20,9 +21,11 @@ public class TypeStep extends Step<String> {
     private final int DRIVER_RADIO_BUTTON_ID = 7;
     private final int PASSANGER_RADIO_BUTTON_ID = 8;
     private int checkedRadioButtonId;
+    private ProgramTripFragment stepper;
 
-    public TypeStep(String stepTitle) {
+    public TypeStep(ProgramTripFragment st, String stepTitle) {
         super(stepTitle);
+        this.stepper = st;
 
     }
 
@@ -44,12 +47,13 @@ public class TypeStep extends Step<String> {
         driverRadioButton.setText(getContext().getResources().getString(R.string.driver_radiobutton_text));
         driverRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         radioGroup.addView(driverRadioButton);
+
+
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 // This will get the radiobutton that has changed in its check state
                 RadioButton checkedRadioButton = group.findViewById(checkedId);
                 // This puts the value (true/false) into the variable
-                boolean isChecked = checkedRadioButton.isChecked();
                 checkedRadioButtonId = checkedId;
                 markAsCompletedOrUncompleted(true);
             }
@@ -76,7 +80,7 @@ public class TypeStep extends Step<String> {
         // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
         String type = getStepData();
-        return !type.isEmpty() ? type : "(Empty)";
+        return !type.isEmpty() ? type : getContext().getString(R.string.empty_step);
     }
 
     @Override
@@ -98,7 +102,6 @@ public class TypeStep extends Step<String> {
 
     @Override
     protected void onStepOpened(boolean animated) {
-
     }
 
     @Override
@@ -115,4 +118,6 @@ public class TypeStep extends Step<String> {
     protected void onStepMarkedAsUncompleted(boolean animated) {
 
     }
+
+
 }
