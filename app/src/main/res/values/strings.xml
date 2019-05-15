@@ -34,9 +34,55 @@
     <string name="driver_radiobutton_text">Soy conductor</string>
     <string name="type_of_usser_step_error">Debes seleccionar el rol que desempeñarás.</string>
     <string name="passanger_type_step_title">Cual sera tu rol en este viaje?</string>
-    <string name="destination_step_title">A donde te diriges?</string>
-    <string name="to_univerdsity_radiobutton_text">Hacia la univeridad</string>
-    <string name="from_university_radiobutton_text">Desde la universidad</string>
+    <string name="destination_step_title">Sales o te diriges hacia la universidad?</string>
+    <string name="to_univerdsity_radiobutton_text">Salgo de la univeridad</string>
+    <string name="from_university_radiobutton_text">Voy hacia la universidad</string>
     <string name="destination_step_error">Debes elegir tu destino</string>
+
+    <string name="day_step_title">Que día realizaras tu viaje?</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="empty_step">(Vacío)</string>
+    <string name="hour_step_title">Cual es tu hora de llegada/salida de la universidad?</string>
+
+    <string-array name="capacity_array">
+        <item>1 Cupo</item>
+        <item>2 Cupos</item>
+        <item>3 Cupos</item>
+        <item>4 Cupos</item>
+        <item>5 Cupos</item>
+        <item>6 Cupos</item>
+        <item>7 Cupos</item>
+    </string-array>
+    <string-array name="days_array">
+        <item>Lunes</item>
+        <item>Martes</item>
+        <item>Miercoles</item>
+        <item>Jueves</item>
+        <item>Viernes</item>
+        <item>Sabado</item>
+    </string-array>
+    <string-array name="hours_array">
+        <item>7:00 AM</item>
+        <item>8:30 AM</item>
+        <item>10:00 AM</item>
+        <item>11:30 AM</item>
+        <item>1:00 PM</item>
+        <item>2:30 PM</item>
+        <item>4:00 PM</item>
+        <item>5:30 PM</item>
+        <item>7:00 PM</item>
+    </string-array>
+
+    <string name="name">Nombre</string>
+    <string name="repassword">Re-type Password</string>
+    <string name="bad_email">Debe ingresar con el correo de la universidad</string>
+    <string name="inequal_password">Las contraseñas no son iguales</string>
+    <string name="sended_email">Se ha enviado un correo para verificar la cuenta</string>
+    <string name="wait">Espere Porfavor</string>
+    <string name="email_verification_failed_dialog_message">No ha verificado su email</string>
+    <string name="create_account_dialog_title">Creacion de cuenta</string>
+
 
 </resources>
