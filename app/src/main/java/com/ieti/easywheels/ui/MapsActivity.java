@@ -31,6 +31,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -40,8 +42,11 @@ import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.model.Trip;
+import com.ieti.easywheels.model.TripRequest;
 
 import java.io.IOException;
+import java.util.Date;
 
 import static com.ieti.easywheels.Constants.ERROR_DIALOG_REQUEST;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -51,7 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "MapActivity";
 
     //State Vars
     private boolean mLocationPermissionGranted;
@@ -76,6 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private LocationManager locationManager;
     private String bestProvider;
+
+    private Marker mUserMarker;
 
 
     @Override
@@ -276,11 +283,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         try {
-            if (mLocationPermissionGranted) {
-//                mMap.setMyLocationEnabled(true);
+            if (mLocationPermissionGranted) { ;
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
-//                mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
                 getLocationPermission();
@@ -307,9 +312,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // Got last known location. In some rare situations, this can be null.
                         if (location != null) {
                             mLastKnownLocation = location;
+
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(),
                                             mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(location.getLatitude(),location.getLongitude()))
+                                    .title("Posicion usuario")
+//                                    .icon()
+                            );
+
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             mMap.moveCamera(CameraUpdateFactory
@@ -326,6 +338,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    //Map UI
+    private void setDriverDirectionRoute() {
+
+    }
+
+    private void setPassengerDirectionRoute(){
+
+    }
+
+    //Google Maps API
     public void calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination) {
         DirectionsApiRequest directionsApiRequest = new DirectionsApiRequest(mGeoApiContext);
         try {
@@ -343,6 +365,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDate, LatLng departurePointDriver){
+        return null;
+    }
+
+    //Firebase functions
+    private void driverCreateTravel(Date departureDate, Date arrivalDate){
+
+    }
+
+    private void passengerRequestTravel(){
+
+    }
+
+    //Match uses Cloud functions
+    private void matchDriverWithPassengers(Trip trip, Date departureDate){
+
+    }
+
+    private void matchPassengerWithDriver(TripRequest tripRequest){
 
     }
 
