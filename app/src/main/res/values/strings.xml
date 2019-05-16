@@ -83,6 +83,10 @@
     <string name="wait">Espere Porfavor</string>
     <string name="email_verification_failed_dialog_message">No ha verificado su email</string>
     <string name="create_account_dialog_title">Creacion de cuenta</string>
+    <string name="confirmation_text_stepper">Siguente</string>
+    <string name="step_confirmation_text">Confirmar viaje</string>
+    <string name="confirmation_step_title">Todos los datos estan correctos?</string>
+    <string name="capacity_text_type_step">Con cuantos cupos cuentas?</string>
 
 
 </resources>
