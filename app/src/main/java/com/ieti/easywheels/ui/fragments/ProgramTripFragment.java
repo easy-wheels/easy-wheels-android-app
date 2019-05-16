@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.ui.MapsActivity;
-import com.ieti.easywheels.ui.fragments.steps.CapacityStep;
 import com.ieti.easywheels.ui.fragments.steps.DayStep;
 import com.ieti.easywheels.ui.fragments.steps.DestinationStep;
 import com.ieti.easywheels.ui.fragments.steps.HourStep;
@@ -30,7 +29,6 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
     private DestinationStep destinationStep;
     private DayStep dayStep;
     private HourStep hourStep;
-    private CapacityStep capacityStep;
 
     public ProgramTripFragment() {
         // Required empty public constructor
@@ -45,12 +43,13 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
         destinationStep = new DestinationStep(getContext().getString(R.string.destination_step_title));
         dayStep = new DayStep(getContext().getString(R.string.day_step_title));
         hourStep = new HourStep(getContext().getString(R.string.hour_step_title));
-        capacityStep = new CapacityStep("prueba");
         View myFragmentView = inflater.inflate(R.layout.fragment_program_trip,container,false);
-
         stepperFormView = myFragmentView.findViewById(R.id.stepper_form);
         stepperFormView
                 .setup(this,typeStep,destinationStep, dayStep, hourStep)
+                .confirmationStepTitle(getContext().getString(R.string.confirmation_step_title))
+                .stepNextButtonText(getContext().getString(R.string.confirmation_text_stepper))
+                .lastStepNextButtonText(getContext().getString(R.string.step_confirmation_text))
                 .init();
         return myFragmentView;
     }
@@ -67,9 +66,6 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
     }
 
     public void addCapacityStep() {
-        stepperFormView
-                .setup(this, typeStep, destinationStep, dayStep, hourStep, capacityStep)
-                .init();
 
     }
 }

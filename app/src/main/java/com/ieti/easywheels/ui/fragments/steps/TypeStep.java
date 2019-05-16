@@ -1,10 +1,14 @@
 package com.ieti.easywheels.ui.fragments.steps;
 
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -19,9 +23,10 @@ public class TypeStep extends Step<String> {
     private RadioButton passangerRadioButton;
     private RadioButton driverRadioButton;
     private final int DRIVER_RADIO_BUTTON_ID = 7;
-    private final int PASSANGER_RADIO_BUTTON_ID = 8;
+    private final int PASSENGER_RADIO_BUTTON_ID = 8;
     private int checkedRadioButtonId;
     private ProgramTripFragment stepper;
+    private Spinner capacitySpinner;
 
     public TypeStep(ProgramTripFragment st, String stepTitle) {
         super(stepTitle);
@@ -37,7 +42,7 @@ public class TypeStep extends Step<String> {
         RadioGroup radioGroup = new RadioGroup(getContext());
 
         passangerRadioButton = new RadioButton(getContext());
-        passangerRadioButton.setId(PASSANGER_RADIO_BUTTON_ID);
+        passangerRadioButton.setId(PASSENGER_RADIO_BUTTON_ID);
         passangerRadioButton.setText(getContext().getResources().getString(R.string.passanger_radiobutton_text));
         passangerRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         radioGroup.addView(passangerRadioButton);
@@ -48,6 +53,19 @@ public class TypeStep extends Step<String> {
         driverRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         radioGroup.addView(driverRadioButton);
 
+        TextView capacityText = new TextView(getContext());
+        capacityText.setText(getContext().getString(R.string.capacity_text_type_step));
+        radioGroup.addView(capacityText);
+
+        capacitySpinner = new Spinner(new ContextThemeWrapper(getContext(), R.style.Theme_MaterialComponents_CompactMenu));
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.capacity_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        capacitySpinner.setAdapter(adapter);
+        capacitySpinner.setEnabled(false);
+        radioGroup.addView(capacitySpinner);
+
+
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -55,6 +73,11 @@ public class TypeStep extends Step<String> {
                 RadioButton checkedRadioButton = group.findViewById(checkedId);
                 // This puts the value (true/false) into the variable
                 checkedRadioButtonId = checkedId;
+                if (checkedRadioButtonId == DRIVER_RADIO_BUTTON_ID) {
+                    capacitySpinner.setEnabled(true);
+                } else {
+                    capacitySpinner.setEnabled(false);
+                }
                 markAsCompletedOrUncompleted(true);
             }
         });
@@ -65,21 +88,27 @@ public class TypeStep extends Step<String> {
 
     @Override
     public String getStepData() {
-        String checkedRadioButtonText = null;
+        String selectedData = null;
+
         if (checkedRadioButtonId == DRIVER_RADIO_BUTTON_ID) {
-            checkedRadioButtonText = getContext().getResources().getString(R.string.driver_radiobutton_text);
-        } else if (checkedRadioButtonId == PASSANGER_RADIO_BUTTON_ID) {
-            checkedRadioButtonText = getContext().getResources().getString(R.string.passanger_radiobutton_text);
+            int cp = capacitySpinner.getSelectedItemPosition() + 1;
+            selectedData = "driver " + cp;
+        } else if (checkedRadioButtonId == PASSENGER_RADIO_BUTTON_ID) {
+            selectedData = "passenger";
         }
-        return checkedRadioButtonText != null ? checkedRadioButtonText : "";
+        return selectedData != null ? selectedData : "";
     }
 
     @Override
     public String getStepDataAsHumanReadableString() {
-        // Because the step's data is already a human-readable string, we don't need to convert it.
-        // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
-        // This string will be displayed in the subtitle of the step whenever the step gets closed.
+
         String type = getStepData();
+        if (type.equals("passenger")) {
+            type = getContext().getResources().getString(R.string.passanger_radiobutton_text);
+        } else if (type.startsWith("driver")) {
+            String capacity = type.split(" ")[1];
+            type = "Soy conductor y cuento con " + capacity + " cupos";
+        }
         return !type.isEmpty() ? type : getContext().getString(R.string.empty_step);
     }
 
@@ -91,7 +120,7 @@ public class TypeStep extends Step<String> {
 
     @Override
     protected IsDataValid isStepDataValid(String stepData) {
-        if (checkedRadioButtonId != PASSANGER_RADIO_BUTTON_ID && checkedRadioButtonId != DRIVER_RADIO_BUTTON_ID) {
+        if (checkedRadioButtonId != PASSENGER_RADIO_BUTTON_ID && checkedRadioButtonId != DRIVER_RADIO_BUTTON_ID) {
             String titleError = getContext().getString(R.string.type_of_usser_step_error);
             return new IsDataValid(false, titleError);
         } else {
