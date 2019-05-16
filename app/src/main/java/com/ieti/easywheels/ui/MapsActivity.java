@@ -11,6 +11,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -33,7 +35,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -44,14 +47,21 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
+import com.google.maps.internal.PolylineEncoding;
 import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
+import com.ieti.easywheels.util.AdapterUtils;
+import com.ieti.easywheels.util.DateUtils;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Arrays;
 
 import static com.ieti.easywheels.Constants.ERROR_DIALOG_REQUEST;
@@ -72,11 +82,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String KEY_LOCATION = "location";
 
     // Map vars
-    private final LatLng mDefaultLocation = new LatLng(4.782715, -74.042611);
+    private final LatLng mUniversityLocation = new LatLng(4.782715, -74.042611);
     private static final int DEFAULT_ZOOM = 13;
 
     //Google API
     private GeoApiContext mGeoApiContext;
+    private PlacesClient mPlacesClient;
 
     //User Map info
     private Location mLastKnownLocation;
@@ -90,26 +101,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AutocompleteSupportFragment searchBox;
 
     private Marker mUserMarker;
+    private Polyline polyline;
+
+    //TripInfo
+    private Boolean toUniversity;
+    private String day;
+    private String hour;
+    private Integer availableSeats;
+    private Boolean isDriver;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
-        Places.initialize(getApplicationContext(), "AIzaSyA8eotv1FPgLtrzHgBLXYF01cA5DmGh-FI");
-        PlacesClient placesClient = Places.createClient(this);
-        setContentView(R.layout.activity_maps);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
 
-        mapFragment.getMapAsync(this);
-        searchBox = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.searchBox);
+        setContentView(R.layout.activity_maps);
+
+        Places.initialize(getApplicationContext(), getString(R.string.places_key));
+
+        mPlacesClient = Places.createClient(this);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        initGoogleMap();
+
+        searchBox = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.searchBox);
         searchBox.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
         searchBox.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -124,10 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "An error occurred: " + status);
             }
         });
-        // Construct a FusedLocationProviderClient.
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        initGoogleMap();
 
     }
 
@@ -135,8 +152,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        String apiKey = getString(R.string.google_maps_key);
+
         if (mGeoApiContext == null) {
-            String apiKey = getString(R.string.google_maps_key);
             mGeoApiContext = new GeoApiContext.Builder().apiKey(apiKey).build();
         }
     }
@@ -310,7 +329,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         try {
-            if (mLocationPermissionGranted) { ;
+            if (mLocationPermissionGranted) {
+                ;
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -344,15 +364,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     new LatLng(mLastKnownLocation.getLatitude(),
                                             mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             mMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(location.getLatitude(),location.getLongitude()))
-                                    .title("Posicion usuario")
+                                            .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                                            .title("Posicion usuario")
 //                                    .icon()
                             );
+
+//                          Todo Delete dummy vars
+                            toUniversity = true;
+                            day = "Monday";
+                            hour = "7:30";
+                            setDriverDirectionRoute();
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+                                    .newLatLngZoom(mUniversityLocation, DEFAULT_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
                             getGpsLocation();
@@ -366,16 +392,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //Map UI
-    private void setDriverDirectionRoute() {
+    private void addPolylineToMap(final DirectionsResult result) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: result routes: " + result.routes.length);
 
+                for (DirectionsRoute route : result.routes) {
+                    Log.d(TAG, "run: leg: " + route.legs[0].toString());
+                    List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
+
+                    List<LatLng> newDecodedPath = new ArrayList<>();
+
+                    // This loops through all the LatLng coordinates of ONE polyline.
+                    for (com.google.maps.model.LatLng latLng : decodedPath) {
+                        newDecodedPath.add(new LatLng(latLng.lat, latLng.lng));
+                    }
+                    polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
+                    polyline.setColor(ContextCompat.getColor(MapsActivity.this, R.color.colorAccent));
+                    polyline.setClickable(true);
+                }
+            }
+        });
     }
 
-    private void setPassengerDirectionRoute(){
+    // Todo move to non UI Thread
+    private void setDriverDirectionRoute() {
+        LatLng origin, destination;
+        Date arrivalDate, departureDate;
+        if (toUniversity) {
+            origin = AdapterUtils.convertLocationToLatLng(mLastKnownLocation);
+            destination = mUniversityLocation;
+        } else {
+            origin = mUniversityLocation;
+            destination = AdapterUtils.convertLocationToLatLng(mLastKnownLocation);
+        }
+        Date dateUniversity = DateUtils.getNextDateFromDayAndHour(day, hour);
+        DirectionsResult result = calculateRoute(TravelMode.DRIVING, origin, destination, dateUniversity);
+        if (toUniversity) {
+            arrivalDate = dateUniversity;
+            departureDate = DateUtils.getDatePlusSeconds(arrivalDate, (int) -result.routes[0].legs[0].duration.inSeconds);
+        } else {
+            departureDate = dateUniversity;
+            arrivalDate = DateUtils.getDatePlusSeconds(departureDate, (int) result.routes[0].legs[0].duration.inSeconds);
+        }
+        addPolylineToMap(result);
+        String message = "Duracion estimada: " + result.routes[0].legs[0].duration.toString();
+
+        driverCreateTravel(departureDate, arrivalDate);
+    }
+
+    private void setPassengerDirectionRoute() {
 
     }
 
     //Google Maps API
-    public void calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination) {
+    public DirectionsResult calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination, Date dateUniversity) {
         DirectionsApiRequest directionsApiRequest = new DirectionsApiRequest(mGeoApiContext);
         try {
             DirectionsResult result = directionsApiRequest.origin(
@@ -383,8 +455,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ).destination(
                     new com.google.maps.model.LatLng(destination.latitude, destination.longitude)
             ).mode(travelMode)
-//            .departureTime()
+                    .departureTime(new org.joda.time.Instant(dateUniversity))
                     .await();
+            return result;
         } catch (ApiException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -392,27 +465,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    private TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDate, LatLng departurePointDriver){
+    private TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDate, LatLng departurePointDriver) {
         return null;
     }
 
     //Firebase functions
-    private void driverCreateTravel(Date departureDate, Date arrivalDate){
+    private void driverCreateTravel(Date departureDate, Date arrivalDate) {
 
     }
 
-    private void passengerRequestTravel(){
+    private void passengerRequestTravel() {
 
     }
 
     //Match uses Cloud functions
-    private void matchDriverWithPassengers(Trip trip, Date departureDate){
+    private void matchDriverWithPassengers(Trip trip, Date departureDate) {
 
     }
 
-    private void matchPassengerWithDriver(TripRequest tripRequest){
+    private void matchPassengerWithDriver(TripRequest tripRequest) {
 
     }
 
