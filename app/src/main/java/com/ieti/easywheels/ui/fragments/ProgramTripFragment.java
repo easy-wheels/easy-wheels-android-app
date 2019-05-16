@@ -57,6 +57,15 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
     @Override
     public void onCompletedForm() {
         Intent intent = new Intent(getActivity(),MapsActivity.class);
+        intent.putExtra("toUniversity", destinationStep.getStepData());
+        intent.putExtra("day", dayStep.getStepData());
+        intent.putExtra("hour", hourStep.getStepData());
+        if (typeStep.getStepData().split(" ").length > 1) {
+            intent.putExtra("isDriver", true);
+            intent.putExtra("availableSeats", Integer.parseInt(typeStep.getStepData().split(" ")[1]));
+        } else {
+            intent.putExtra("isDriver", true);
+        }
         startActivity(intent);
     }
 
