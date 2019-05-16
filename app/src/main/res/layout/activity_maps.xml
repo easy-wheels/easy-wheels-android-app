@@ -6,12 +6,18 @@
     android:orientation="vertical"
     android:weightSum="10">
 
-    <fragment
-        android:id="@+id/searchBox"
-        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="142dp"
-        android:layout_weight="7" />
+        android:layout_height="wrap_content">
+
+        <fragment
+            android:id="@+id/searchBox"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_weight="7" />
+    </androidx.cardview.widget.CardView>
+
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/map"

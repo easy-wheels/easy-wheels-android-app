@@ -25,9 +25,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,6 +33,11 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
@@ -44,6 +46,7 @@ import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.R;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.ieti.easywheels.Constants.ERROR_DIALOG_REQUEST;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -78,7 +81,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private LocationManager locationManager;
     private String bestProvider;
-    private PlaceAutocompleteFragment searchBox;
+    private AutocompleteSupportFragment searchBox;
 
 
     @Override
@@ -90,21 +93,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
-
+        Places.initialize(getApplicationContext(), "AIzaSyA8eotv1FPgLtrzHgBLXYF01cA5DmGh-FI");
+        PlacesClient placesClient = Places.createClient(this);
         setContentView(R.layout.activity_maps);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
         mapFragment.getMapAsync(this);
-        searchBox = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.searchBox);
+        searchBox = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.searchBox);
+        searchBox.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
         searchBox.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                System.out.println("entroooooo");
+                // TODO: Get info about the selected place.
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
             }
 
             @Override
             public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
             }
         });
         // Construct a FusedLocationProviderClient.
