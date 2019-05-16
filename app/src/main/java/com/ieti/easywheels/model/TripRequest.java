@@ -15,6 +15,7 @@ public class TripRequest {
     private Boolean matched;
     private Boolean toUniversity;
     private GeoPoint userPosition;
+    private GeoPoint meetingPoint;
 
     public TripRequest() {
     }
@@ -94,6 +95,26 @@ public class TripRequest {
         this.userPosition = userPosition;
     }
 
+    public Boolean getMatched() {
+        return matched;
+    }
+
+    public Boolean getToUniversity() {
+        return toUniversity;
+    }
+
+    public void setToUniversity(Boolean toUniversity) {
+        this.toUniversity = toUniversity;
+    }
+
+    public GeoPoint getMeetingPoint() {
+        return meetingPoint;
+    }
+
+    public void setMeetingPoint(GeoPoint meetingPoint) {
+        this.meetingPoint = meetingPoint;
+    }
+
     @Override
     public String toString() {
         return "TripRequest{" +
@@ -105,6 +126,7 @@ public class TripRequest {
                 ", matched=" + matched +
                 ", toUniversity=" + toUniversity +
                 ", userPosition=" + userPosition +
+                ", meetingPoint=" + meetingPoint +
                 '}';
     }
 }
