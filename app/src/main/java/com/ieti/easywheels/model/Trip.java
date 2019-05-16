@@ -22,6 +22,9 @@ public class Trip {
     private List<GeoPoint> route;
     private Boolean toUniversity;
 
+    // Wrapper attribute
+    private GeoPoint meetingPoint;
+
     public Trip() {
     }
 
@@ -135,7 +138,13 @@ public class Trip {
         this.toUniversity = toUniversity;
     }
 
+    public GeoPoint getMeetingPoint() {
+        return meetingPoint;
+    }
 
+    public void setMeetingPoint(GeoPoint meetingPoint) {
+        this.meetingPoint = meetingPoint;
+    }
 
     @Override
     public String toString() {
