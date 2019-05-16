@@ -15,6 +15,7 @@ public class Trip {
     private String driverEmail;
     private Boolean full;
     private List<String> geoHashes;
+
     private String hour;
     private List<String> passengers;
     private List<PassengerInfo> passengersWithInfo;
@@ -22,6 +23,20 @@ public class Trip {
     private Boolean toUniversity;
 
     public Trip() {
+    }
+
+    public Trip(Integer capacity, String day, Date departureDate, String driverEmail, String hour, List<GeoPoint> route, Boolean toUniversity,Date arrivalDate) {
+        this.capacity = capacity;
+        this.day = day;
+        this.departureDate = departureDate;
+        this.driverEmail = driverEmail;
+        this.hour = hour;
+        this.route = route;
+        this.toUniversity = toUniversity;
+        this.arrivalDate = arrivalDate;
+        full = false;
+        passengers = null;
+        passengersWithInfo = null;
     }
 
     public Date getArrivalDate() {
@@ -119,6 +134,8 @@ public class Trip {
     public void setToUniversity(Boolean toUniversity) {
         this.toUniversity = toUniversity;
     }
+
+
 
     @Override
     public String toString() {

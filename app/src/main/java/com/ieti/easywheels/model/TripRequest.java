@@ -19,6 +19,17 @@ public class TripRequest {
     public TripRequest() {
     }
 
+    public TripRequest(Date arrivalDate, String day, String email, String hour, Boolean matched, Boolean toUniversity, GeoPoint userPosition) {
+        this.arrivalDate = arrivalDate;
+        this.day = day;
+        this.email = email;
+        this.hour = hour;
+        this.matched = matched;
+        this.toUniversity = toUniversity;
+        this.userPosition = userPosition;
+        this.geoHash = null;
+    }
+
     public Date getArrivalDate() {
         return arrivalDate;
     }
