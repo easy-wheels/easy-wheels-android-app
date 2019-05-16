@@ -44,6 +44,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
@@ -54,15 +55,17 @@ import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
+import com.ieti.easywheels.network.Firebase;
 import com.ieti.easywheels.util.AdapterUtils;
 import com.ieti.easywheels.util.DateUtils;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.ieti.easywheels.Constants.ERROR_DIALOG_REQUEST;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -73,6 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     private static final String TAG = "MapActivity";
+    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     //State Vars
     private boolean mLocationPermissionGranted;
@@ -86,7 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int DEFAULT_ZOOM = 13;
 
     //Google API
-    private GeoApiContext mGeoApiContext;
+    private static GeoApiContext mGeoApiContext;
     private PlacesClient mPlacesClient;
 
     //User Map info
@@ -373,7 +377,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             toUniversity = true;
                             day = "Monday";
                             hour = "7:30";
-                            setDriverDirectionRoute();
+                            isDriver = true;
+                            availableSeats = 2;
+                            makeRequest();
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -416,7 +422,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    // Todo move to non UI Thread
+    private void makeRequest() {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (isDriver) {
+                    setDriverDirectionRoute();
+                } else {
+                    passengerRequestTravel();
+                }
+            }
+        });
+    }
+
     private void setDriverDirectionRoute() {
         LatLng origin, destination;
         Date arrivalDate, departureDate;
@@ -439,7 +457,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addPolylineToMap(result);
         String message = "Duracion estimada: " + result.routes[0].legs[0].duration.toString();
 
-        driverCreateTravel(departureDate, arrivalDate);
+        driverCreateTravel(departureDate, arrivalDate, result);
     }
 
     private void setPassengerDirectionRoute() {
@@ -447,7 +465,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //Google Maps API
-    public DirectionsResult calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination, Date dateUniversity) {
+    public static DirectionsResult calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination, Date dateUniversity) {
         DirectionsApiRequest directionsApiRequest = new DirectionsApiRequest(mGeoApiContext);
         try {
             DirectionsResult result = directionsApiRequest.origin(
@@ -468,25 +486,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return null;
     }
 
-    private TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDate, LatLng departurePointDriver) {
-        return null;
-    }
-
     //Firebase functions
-    private void driverCreateTravel(Date departureDate, Date arrivalDate) {
-
+    private void driverCreateTravel(Date departureDate, Date arrivalDate, DirectionsResult result) {
+        List<com.google.maps.model.LatLng> latLngPoints = result.routes[0].overviewPolyline.decodePath();
+        List<GeoPoint> route = new ArrayList<>();
+        for (int i = 0; i < latLngPoints.size(); i++) {
+            route.add(AdapterUtils.convertLatLngToGeoPoint(latLngPoints.get(i)));
+        }
+        try {
+            String email = Firebase.getFAuth().getCurrentUser().getEmail();
+            Trip trip = new Trip(availableSeats, day, departureDate, email, hour, route, toUniversity, arrivalDate);
+            Firebase.driverCreateTravel(trip);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     private void passengerRequestTravel() {
-
-    }
-
-    //Match uses Cloud functions
-    private void matchDriverWithPassengers(Trip trip, Date departureDate) {
-
-    }
-
-    private void matchPassengerWithDriver(TripRequest tripRequest) {
+        Date arrivalDate = DateUtils.getNextDateFromDayAndHour(day, hour);
+        try {
+            String email = Firebase.getFAuth().getCurrentUser().getEmail();
+            GeoPoint userPosition = AdapterUtils.convertLocationToGeoPoint(mLastKnownLocation);
+            TripRequest tripRequest = new TripRequest(arrivalDate, day, email, hour, false, toUniversity, userPosition);
+            Firebase.passengerRequestTravel(tripRequest);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
     }
 
