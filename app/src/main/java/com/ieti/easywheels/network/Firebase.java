@@ -16,6 +16,7 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
+import com.ieti.easywheels.model.User;
 import com.ieti.easywheels.ui.MapsActivity;
 import com.ieti.easywheels.util.AdapterUtils;
 import com.ieti.easywheels.util.DateUtils;
@@ -44,6 +45,10 @@ public class Firebase {
             FAuth = FirebaseAuth.getInstance();
         }
         return FAuth;
+    }
+
+    public static Task<Void> createUser(User user){
+        return db.collection("users").document(user.getEmail()).set(user);
     }
 
     public static void driverCreateTravel(final Trip trip) {

@@ -14,12 +14,14 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.model.User;
 import com.ieti.easywheels.network.Firebase;
 
 public class CreateAccountActivity extends AppCompatActivity {
@@ -71,18 +73,24 @@ public class CreateAccountActivity extends AppCompatActivity {
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            Firebase
-                                                    .getFAuth()
-                                                    .getCurrentUser()
-                                                    .sendEmailVerification()
-                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            Firebase.createUser(new User(email.getEditText().getText().toString(),name.getEditText().getText().toString()))
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                         @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                        public void onSuccess(Void aVoid) {
                                                             Firebase
                                                                     .getFAuth()
-                                                                    .signOut();
-                                                            buildDialog(getApplicationContext().getResources().getString(R.string.sended_email));
-                                                            alertDialog.show();
+                                                                    .getCurrentUser()
+                                                                    .sendEmailVerification()
+                                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                            Firebase
+                                                                                    .getFAuth()
+                                                                                    .signOut();
+                                                                            buildDialog(getApplicationContext().getResources().getString(R.string.sended_email));
+                                                                            alertDialog.show();
+                                                                        }
+                                                                    });
                                                         }
                                                     });
                                         }
