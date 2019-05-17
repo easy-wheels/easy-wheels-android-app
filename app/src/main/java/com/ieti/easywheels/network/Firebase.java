@@ -9,13 +9,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
-import com.ieti.easywheels.ui.MapsActivity;
-import com.ieti.easywheels.util.AdapterUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -190,6 +187,31 @@ public class Firebase {
                         }
                     }
                 });
+    }
+
+    public static List<Trip> getTripsAsDriver() {
+        final List<Trip> trips = new ArrayList<>();
+        db.collection("trips").whereEqualTo("driverEmail", FAuth.getCurrentUser().getEmail()).get()
+            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                    for(DocumentSnapshot d : list){
+                        trips.add(d.toObject(Trip.class));
+                    }
+                    synchronized (trips) {
+                        trips.notify();
+                    }
+                }
+            });
+        try {
+            synchronized (trips) {
+                trips.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return trips;
     }
 
 }
