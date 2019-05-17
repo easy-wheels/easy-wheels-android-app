@@ -1,14 +1,14 @@
 package com.ieti.easywheels.model;
 
-import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
+import java.util.HashMap;
 
 public class PassengerInfo {
 
     private @ServerTimestamp Date meetingDate;
-    private GeoPoint meetingPoint;
+    private HashMap<String,Double> meetingPoint;
     private String passengerEmail;
 
     public PassengerInfo() {
@@ -22,11 +22,11 @@ public class PassengerInfo {
         this.meetingDate = meetingDate;
     }
 
-    public GeoPoint getMeetingPoint() {
+    public HashMap<String, Double> getMeetingPoint() {
         return meetingPoint;
     }
 
-    public void setMeetingPoint(GeoPoint meetingPoint) {
+    public void setMeetingPoint(HashMap<String, Double> meetingPoint) {
         this.meetingPoint = meetingPoint;
     }
 

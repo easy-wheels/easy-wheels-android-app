@@ -12,15 +12,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
 import com.ieti.easywheels.ui.MapsActivity;
 import com.ieti.easywheels.util.AdapterUtils;
+import com.ieti.easywheels.util.DateUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,7 +36,7 @@ public class Firebase {
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static FirebaseFunctions functions = FirebaseFunctions.getInstance();
 
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public static FirebaseAuth getFAuth() {
         if (FAuth == null) {
@@ -96,19 +100,38 @@ public class Firebase {
             public void run() {
                 try {
                     Response<List<TripRequest>> response = RetrofitConnection.getCloudFunctionsService().matchDriverWithPassenger(trip).execute();
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.code() == 200) {
                         List<TripRequest> passengers = response.body();
+
                         List<Thread> threads = new ArrayList<>();
-                        for(final TripRequest passenger: passengers){
+                        final List<TripRequest> updatedPassengers = new CopyOnWriteArrayList<>();
+
+                        for (final TripRequest passenger : passengers) {
                             threads.add(new Thread() {
                                 @Override
                                 public void run() {
-//                                    updateTripRequestWhenMatch
+                                    LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
+                                    TripRequest updatedPassenger = updateTripRequestWhenMatch(passenger, trip.getDepartureDate(), driverDeparturePoint);
+                                    updatedPassengers.add(updatedPassenger);
                                 }
                             });
                         }
+
+                        for (Thread thread : threads)
+                            thread.start();
+
+                        for (Thread thread : threads)
+                            thread.join();
+
+//                        Todo AddPassengersToTrip
+//                        Todo call callback function to MapActivity and do UI stuff
+
+                    } else{
+//                        const message = "No hemos encontrado pasajeros cerca a tu ruta, pero te informaremos cuando los haya";
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -121,23 +144,55 @@ public class Firebase {
             public void run() {
                 try {
                     Response<Trip> response = RetrofitConnection.getCloudFunctionsService().matchPassengerWithDriver(tripRequest).execute();
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.code() == 200) {
                         Trip trip = response.body();
                         tripRequest.setMeetingPoint(trip.getMeetingPoint());
-                        Date departureDateDriver = trip.getDepartureDate();
-//                        departurePointDriver = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
-//                        TripRequest passenger = update
+                        LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
+
+                        TripRequest passenger = updateTripRequestWhenMatch(tripRequest, trip.getDepartureDate(), driverDeparturePoint);
+                        // Todo call callback function to MapActivity and do UI stuff
+
+                        Boolean full = false;
+                        if (trip.getPassengers() != null){
+                            full = trip.getAvailableSeats() == trip.getPassengers().size() + 1;
+                        }
+                        //Todo addPassengerToTrip
+
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
                     e.printStackTrace();
                 }
             }
         });
     }
 
-    private TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDate, LatLng departurePointDriver) {
-//        MapsActivity.calculateRoute();
-        return null;
+    //Sync function DO NOT Call it in Main Thread
+    private static TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDateDriver, LatLng driverDeparturePoint) {
+        DirectionsResult routeToMeeting = MapsActivity.calculateRoute(TravelMode.DRIVING, driverDeparturePoint,
+                AdapterUtils.convertGeoPointToLatLng(tripRequest.getMeetingPoint()),
+                departureDateDriver);
+        int durationToMeeting = (int) routeToMeeting.routes[0].legs[0].duration.inSeconds;
+        Date meetingDate = DateUtils.getDatePlusSeconds(departureDateDriver, durationToMeeting);
+
+        DirectionsResult routeWalking = MapsActivity.calculateRoute(TravelMode.WALKING,
+                AdapterUtils.convertGeoPointToLatLng(tripRequest.getUserPosition()),
+                AdapterUtils.convertGeoPointToLatLng(tripRequest.getMeetingPoint()) );
+        int durationWalking = (int) routeWalking.routes[0].legs[0].duration.inSeconds;
+        Date departureDate = DateUtils.getDatePlusSeconds(meetingDate, -durationWalking);
+
+        List<GeoPoint> points = new ArrayList<>();
+        List<com.google.maps.model.LatLng> latLngPoints = routeWalking.routes[0].overviewPolyline.decodePath();
+        for (int i = 0; i < latLngPoints.size(); i++) {
+            points.add(AdapterUtils.convertLatLngToGeoPoint(latLngPoints.get(i)));
+        }
+
+        tripRequest.setDepartureDate(departureDate);
+        tripRequest.setMeetingDate(meetingDate);
+        tripRequest.setRouteWalking(points);
+
+        return tripRequest;
     }
 
 
@@ -190,6 +245,31 @@ public class Firebase {
                         }
                     }
                 });
+    }
+
+    public static List<Trip> getTripsAsDriver() {
+        final List<Trip> trips = new ArrayList<>();
+        db.collection("trips").whereEqualTo("driverEmail", FAuth.getCurrentUser().getEmail()).get()
+            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                    for(DocumentSnapshot d : list){
+                        trips.add(d.toObject(Trip.class));
+                    }
+                    synchronized (trips) {
+                        trips.notify();
+                    }
+                }
+            });
+        try {
+            synchronized (trips) {
+                trips.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return trips;
     }
 
 }

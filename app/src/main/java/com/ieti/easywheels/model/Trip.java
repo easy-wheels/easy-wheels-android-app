@@ -9,7 +9,7 @@ import java.util.List;
 public class Trip {
 
     private @ServerTimestamp Date arrivalDate;
-    private Integer capacity;
+    private Integer availableSeats;
     private String day;
     private @ServerTimestamp Date departureDate;
     private String driverEmail;
@@ -28,8 +28,8 @@ public class Trip {
     public Trip() {
     }
 
-    public Trip(Integer capacity, String day, Date departureDate, String driverEmail, String hour, List<GeoPoint> route, Boolean toUniversity,Date arrivalDate) {
-        this.capacity = capacity;
+    public Trip(Integer availableSeats, String day, Date departureDate, String driverEmail, String hour, List<GeoPoint> route, Boolean toUniversity, Date arrivalDate) {
+        this.availableSeats = availableSeats;
         this.day = day;
         this.departureDate = departureDate;
         this.driverEmail = driverEmail;
@@ -50,12 +50,12 @@ public class Trip {
         this.arrivalDate = arrivalDate;
     }
 
-    public Integer getCapacity() {
-        return capacity;
+    public Integer getAvailableSeats() {
+        return availableSeats;
     }
 
-    public void setCapacity(Integer capacity) {
-        this.capacity = capacity;
+    public void setAvailableSeats(Integer availableSeats) {
+        this.availableSeats = availableSeats;
     }
 
     public String getDay() {
@@ -63,7 +63,26 @@ public class Trip {
     }
 
     public void setDay(String day) {
-        this.day = day;
+        switch (day){
+            case "Monday":
+                this.day="Lunes";
+                break;
+            case "Tuesday":
+                this.day="Martes";
+                break;
+            case "Wednesday":
+                this.day="Miercoles";
+                break;
+            case "Thursday":
+                this.day="Jueves";
+                break;
+            case "Friday":
+                this.day="Viernes";
+                break;
+            case "Saturday":
+                this.day="Sabado";
+                break;
+        }
     }
 
     public Date getDepartureDate() {
@@ -150,7 +169,7 @@ public class Trip {
     public String toString() {
         return "Trip{" +
                 "arrivalDate=" + arrivalDate +
-                ", capacity=" + capacity +
+                ", availableSeats=" + availableSeats +
                 ", day='" + day + '\'' +
                 ", departureDate=" + departureDate +
                 ", driverEmail='" + driverEmail + '\'' +

@@ -4,6 +4,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
+import java.util.List;
 
 public class TripRequest {
 
@@ -12,10 +13,17 @@ public class TripRequest {
     private String email;
     private String geoHash;
     private String hour;
+
     private Boolean matched;
     private Boolean toUniversity;
+
+    private Date departureDate;
+    private Date meetingDate;
+
     private GeoPoint userPosition;
     private GeoPoint meetingPoint;
+
+    private List<GeoPoint> routeWalking;
 
     public TripRequest() {
     }
@@ -113,6 +121,31 @@ public class TripRequest {
 
     public void setMeetingPoint(GeoPoint meetingPoint) {
         this.meetingPoint = meetingPoint;
+    }
+
+
+    public List<GeoPoint> getRouteWalking() {
+        return routeWalking;
+    }
+
+    public void setRouteWalking(List<GeoPoint> routeWalking) {
+        this.routeWalking = routeWalking;
+    }
+
+    public Date getDepartureDate() {
+        return departureDate;
+    }
+
+    public void setDepartureDate(Date departureDate) {
+        this.departureDate = departureDate;
+    }
+
+    public Date getMeetingDate() {
+        return meetingDate;
+    }
+
+    public void setMeetingDate(Date meetingDate) {
+        this.meetingDate = meetingDate;
     }
 
     @Override
