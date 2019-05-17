@@ -17,4 +17,14 @@ public class AdapterUtils {
     public static GeoPoint convertLocationToGeoPoint(Location location) {
         return new GeoPoint(location.getLatitude(), location.getLongitude());
     }
+
+    public static com.google.maps.model.LatLng convertLatLngToApiLatLng(LatLng latLng) {
+        return new com.google.maps.model.LatLng(latLng.latitude, latLng.longitude);
+    }
+
+    public static LatLng convertGeoPointToLatLng(GeoPoint latLng) {
+        return new LatLng(latLng.getLatitude(), latLng.getLongitude());
+    }
+
+
 }
