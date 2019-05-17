@@ -140,11 +140,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         initGoogleMap();
         initPlacesSearchBox();
         confirmationButton = findViewById(R.id.floatingActionButton);
+
+//        isDriver = getIntent().getBooleanExtra("isDriver");
+
         confirmationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // TODO: Handle the trip creation
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isDriver) {
+                            setDriverDirectionRoute();
+                        } else {
+                            passengerRequestTravel();
+                        }
+                    }
+                });
             }
         });
+
+
 
 
 
@@ -341,6 +355,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
+        if (mMap == null) {
+            return;
+        }
         if (checkMapServices()) {
             if (mLocationPermissionGranted) {
                 getDeviceLocation();
@@ -405,7 +422,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             hour = "7:30";
                             isDriver = true;
                             availableSeats = 2;
-                            makeRequest();
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -448,19 +464,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void makeRequest() {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (isDriver) {
-                    setDriverDirectionRoute();
-                } else {
-                    passengerRequestTravel();
-                }
-            }
-        });
-    }
-
     private void setDriverDirectionRoute() {
         LatLng origin, destination;
         Date arrivalDate, departureDate;
@@ -494,12 +497,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static DirectionsResult calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination, Date dateUniversity) {
         DirectionsApiRequest directionsApiRequest = new DirectionsApiRequest(mGeoApiContext);
         try {
-            DirectionsResult result = directionsApiRequest.origin(
-                    new com.google.maps.model.LatLng(origin.latitude, origin.longitude)
-            ).destination(
-                    new com.google.maps.model.LatLng(destination.latitude, destination.longitude)
-            ).mode(travelMode)
+            DirectionsResult result = directionsApiRequest
+                    .origin(AdapterUtils.convertLatLngToApiLatLng(origin))
+                    .destination(AdapterUtils.convertLatLngToApiLatLng(destination))
+                    .mode(travelMode)
                     .departureTime(new org.joda.time.Instant(dateUniversity))
+                    .await();
+            return result;
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static DirectionsResult calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination) {
+        DirectionsApiRequest directionsApiRequest = new DirectionsApiRequest(mGeoApiContext);
+        try {
+            DirectionsResult result = directionsApiRequest
+                    .origin(AdapterUtils.convertLatLngToApiLatLng(origin))
+                    .destination(AdapterUtils.convertLatLngToApiLatLng(destination))
+                    .mode(travelMode)
                     .await();
             return result;
         } catch (ApiException e) {
