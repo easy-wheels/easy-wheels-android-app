@@ -14,13 +14,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -45,6 +46,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
@@ -61,17 +63,20 @@ import com.ieti.easywheels.util.DateUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
+
 import static com.ieti.easywheels.Constants.ERROR_DIALOG_REQUEST;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap;
 
@@ -103,6 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private String bestProvider;
     private AutocompleteSupportFragment searchBox;
+    private FloatingActionButton confirmationButton;
 
     private Marker mUserMarker;
     private Polyline polyline;
@@ -123,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
-
+        getTripData();
         setContentView(R.layout.activity_maps);
 
         Places.initialize(getApplicationContext(), getString(R.string.places_key));
@@ -132,7 +138,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         initGoogleMap();
+        initPlacesSearchBox();
+        confirmationButton = findViewById(R.id.floatingActionButton);
+        confirmationButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // TODO: Handle the trip creation
+            }
+        });
 
+
+
+    }
+
+    private void initPlacesSearchBox() {
         searchBox = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.searchBox);
         searchBox.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
         searchBox.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -148,8 +166,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "An error occurred: " + status);
             }
         });
+    }
 
-
+    private void getTripData() {
+        day = (String) getIntent().getExtras().get("day");
+        hour = (String) getIntent().getExtras().get("hour");
+        toUniversity = (Boolean) getIntent().getExtras().get("toUniversity");
+        isDriver = (Boolean) getIntent().getExtras().get("isDriver");
+        if (isDriver) {
+            availableSeats = (int) getIntent().getExtras().get("availableSeats");
+        }
     }
 
     private void initGoogleMap() {
