@@ -2,20 +2,27 @@ package com.ieti.easywheels.ui.fragments;
 
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+
+import androidx.fragment.app.Fragment;
 
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.model.Trip;
+import com.ieti.easywheels.network.Firebase;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class TripsFragment extends Fragment {
 
+    ScrollView scrollViewTrips;
+    LinearLayout linearLayoutTrips;
 
     public TripsFragment() {
         // Required empty public constructor
@@ -23,10 +30,34 @@ public class TripsFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View myFragmentView = inflater.inflate(R.layout.fragment_trips, container, false);
+        final View myFragmentView = inflater.inflate(R.layout.fragment_trips, container, false);
+        scrollViewTrips = myFragmentView.findViewById(R.id.scrollViewTrips);
+        linearLayoutTrips = myFragmentView.findViewById(R.id.linearLayoutTrips);
+
+        Thread thread = new Thread(){
+            @Override
+            public void run(){
+                List<Trip> trips;
+                trips = Firebase.getTripsAsDriver();
+                final List<Trip> finalTrips = trips;
+                getActivity()
+                        .runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for(Trip t: finalTrips){
+                                    linearLayoutTrips.addView(new TripCard(t).onCreateView(inflater, container, savedInstanceState));
+                                }
+                                myFragmentView.invalidate();
+                            }
+                        });
+            }
+        };
+
+        thread.start();
+
         return myFragmentView;
     }
 
