@@ -10,12 +10,13 @@ import com.ieti.easywheels.R;
 
 import ernestoyaquello.com.verticalstepperform.Step;
 
-public class DestinationStep extends Step<String> {
+public class DestinationStep extends Step<Boolean> {
     private final int TOU_RADIO_BUTTON_ID = 7;
     private final int FROMU_RADIO_BUTTON_ID = 8;
     private RadioButton fromUniversityRadioButton;
     private RadioButton toUniversityRadioButton;
-    private int checkedRadioButtonId;
+    private RadioGroup radioGroup;
+    private boolean toUniversity;
 
     public DestinationStep(String title) {
         super(title);
@@ -24,7 +25,7 @@ public class DestinationStep extends Step<String> {
     @Override
     protected View createStepContentLayout() {
         // Here we generate the view that will be used by the library as the content of the step.
-        RadioGroup radioGroup = new RadioGroup(getContext());
+        radioGroup = new RadioGroup(getContext());
 
         fromUniversityRadioButton = new RadioButton(getContext());
         fromUniversityRadioButton.setId(FROMU_RADIO_BUTTON_ID);
@@ -43,7 +44,11 @@ public class DestinationStep extends Step<String> {
                 RadioButton checkedRadioButton = group.findViewById(checkedId);
                 // This puts the value (true/false) into the variable
                 boolean isChecked = checkedRadioButton.isChecked();
-                checkedRadioButtonId = checkedId;
+                if (checkedId == TOU_RADIO_BUTTON_ID) {
+                    toUniversity = true;
+                } else if (checkedId == FROMU_RADIO_BUTTON_ID) {
+                    toUniversity = false;
+                }
                 markAsCompletedOrUncompleted(true);
             }
         });
@@ -53,15 +58,10 @@ public class DestinationStep extends Step<String> {
     }
 
     @Override
-    public String getStepData() {
+    public Boolean getStepData() {
         // We get the step's data from the value that the user has typed in the EditText view.
-        String checkedRadioButtonText = null;
-        if (checkedRadioButtonId == TOU_RADIO_BUTTON_ID) {
-            checkedRadioButtonText = getContext().getResources().getString(R.string.to_univerdsity_radiobutton_text);
-        } else if (checkedRadioButtonId == FROMU_RADIO_BUTTON_ID) {
-            checkedRadioButtonText = getContext().getResources().getString(R.string.from_university_radiobutton_text);
-        }
-        return checkedRadioButtonText != null ? checkedRadioButtonText : "";
+
+        return toUniversity;
     }
 
     @Override
@@ -69,20 +69,25 @@ public class DestinationStep extends Step<String> {
         // Because the step's data is already a human-readable string, we don't need to convert it.
         // However, we return "(Empty)" if the text is empty to avoid not having any text to display.
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
-        String type = getStepData();
-        return !type.isEmpty() ? type : getContext().getString(R.string.empty_step);
+        String checkedRadioButtonText = "";
+        if (radioGroup.getCheckedRadioButtonId() == TOU_RADIO_BUTTON_ID) {
+            checkedRadioButtonText = getContext().getResources().getString(R.string.to_univerdsity_radiobutton_text);
+        } else if (radioGroup.getCheckedRadioButtonId() == FROMU_RADIO_BUTTON_ID) {
+            checkedRadioButtonText = getContext().getResources().getString(R.string.from_university_radiobutton_text);
+        }
+        return !checkedRadioButtonText.isEmpty() ? checkedRadioButtonText : getContext().getString(R.string.empty_step);
     }
 
     @Override
-    public void restoreStepData(String stepData) {
+    public void restoreStepData(Boolean stepData) {
         // To restore the step after a configuration change, we restore the text of its EditText view.
         fromUniversityRadioButton.setChecked(false);
         toUniversityRadioButton.setChecked(false);
     }
 
     @Override
-    protected IsDataValid isStepDataValid(String stepData) {
-        if (checkedRadioButtonId != FROMU_RADIO_BUTTON_ID && checkedRadioButtonId != TOU_RADIO_BUTTON_ID) {
+    protected IsDataValid isStepDataValid(Boolean stepData) {
+        if (!toUniversityRadioButton.isChecked() && !fromUniversityRadioButton.isChecked()) {
             String titleError = getContext().getString(R.string.destination_step_error);
             return new IsDataValid(false, titleError);
         } else {
