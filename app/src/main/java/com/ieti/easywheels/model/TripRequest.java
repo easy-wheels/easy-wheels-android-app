@@ -4,6 +4,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class TripRequest {
@@ -21,9 +22,9 @@ public class TripRequest {
     private Date meetingDate;
 
     private GeoPoint userPosition;
-    private GeoPoint meetingPoint;
+    private HashMap<String,Double> meetingPoint;
 
-    private List<GeoPoint> routeWalking;
+    private List<HashMap<String,Double>> routeWalking;
 
     public TripRequest() {
     }
@@ -52,7 +53,26 @@ public class TripRequest {
     }
 
     public void setDay(String day) {
-        this.day = day;
+        switch (day){
+            case "Monday":
+                this.day="Lunes";
+                break;
+            case "Tuesday":
+                this.day="Martes";
+                break;
+            case "Wednesday":
+                this.day="Miercoles";
+                break;
+            case "Thursday":
+                this.day="Jueves";
+                break;
+            case "Friday":
+                this.day="Viernes";
+                break;
+            case "Saturday":
+                this.day="Sabado";
+                break;
+        }
     }
 
     public String getEmail() {
@@ -79,20 +99,8 @@ public class TripRequest {
         this.hour = hour;
     }
 
-    public boolean isMatched() {
-        return matched;
-    }
-
     public void setMatched(Boolean matched) {
         this.matched = matched;
-    }
-
-    public Boolean isToUniversity() {
-        return toUniversity;
-    }
-
-    public void setToUniversity(boolean toUniversity) {
-        this.toUniversity = toUniversity;
     }
 
     public GeoPoint getUserPosition() {
@@ -115,20 +123,20 @@ public class TripRequest {
         this.toUniversity = toUniversity;
     }
 
-    public GeoPoint getMeetingPoint() {
+    public HashMap<String, Double> getMeetingPoint() {
         return meetingPoint;
     }
 
-    public void setMeetingPoint(GeoPoint meetingPoint) {
+    public void setMeetingPoint(HashMap<String, Double> meetingPoint) {
         this.meetingPoint = meetingPoint;
     }
 
 
-    public List<GeoPoint> getRouteWalking() {
+    public List<HashMap<String, Double>> getRouteWalking() {
         return routeWalking;
     }
 
-    public void setRouteWalking(List<GeoPoint> routeWalking) {
+    public void setRouteWalking(List<HashMap<String, Double>> routeWalking) {
         this.routeWalking = routeWalking;
     }
 

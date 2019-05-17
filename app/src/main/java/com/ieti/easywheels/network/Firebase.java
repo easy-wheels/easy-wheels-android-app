@@ -23,6 +23,7 @@ import com.ieti.easywheels.util.DateUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -146,7 +147,10 @@ public class Firebase {
                     Response<Trip> response = RetrofitConnection.getCloudFunctionsService().matchPassengerWithDriver(tripRequest).execute();
                     if (response.isSuccessful() && response.code() == 200) {
                         Trip trip = response.body();
-                        tripRequest.setMeetingPoint(trip.getMeetingPoint());
+                        HashMap<String,Double> meetingPoint = new HashMap<>();
+                        meetingPoint.put("lat",trip.getMeetingPoint().getLatitude());
+                        meetingPoint.put("lng",trip.getMeetingPoint().getLongitude());
+                        tripRequest.setMeetingPoint(meetingPoint);
                         LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
 
                         TripRequest passenger = updateTripRequestWhenMatch(tripRequest, trip.getDepartureDate(), driverDeparturePoint);
@@ -171,14 +175,14 @@ public class Firebase {
     //Sync function DO NOT Call it in Main Thread
     private static TripRequest updateTripRequestWhenMatch(TripRequest tripRequest, Date departureDateDriver, LatLng driverDeparturePoint) {
         DirectionsResult routeToMeeting = MapsActivity.calculateRoute(TravelMode.DRIVING, driverDeparturePoint,
-                AdapterUtils.convertGeoPointToLatLng(tripRequest.getMeetingPoint()),
+                AdapterUtils.convertGeoPointToLatLng(new GeoPoint(tripRequest.getMeetingPoint().get("lat"),tripRequest.getMeetingPoint().get("lng"))),
                 departureDateDriver);
         int durationToMeeting = (int) routeToMeeting.routes[0].legs[0].duration.inSeconds;
         Date meetingDate = DateUtils.getDatePlusSeconds(departureDateDriver, durationToMeeting);
 
         DirectionsResult routeWalking = MapsActivity.calculateRoute(TravelMode.WALKING,
                 AdapterUtils.convertGeoPointToLatLng(tripRequest.getUserPosition()),
-                AdapterUtils.convertGeoPointToLatLng(tripRequest.getMeetingPoint()) );
+                AdapterUtils.convertGeoPointToLatLng(new GeoPoint(tripRequest.getMeetingPoint().get("lat"),tripRequest.getMeetingPoint().get("lng"))) );
         int durationWalking = (int) routeWalking.routes[0].legs[0].duration.inSeconds;
         Date departureDate = DateUtils.getDatePlusSeconds(meetingDate, -durationWalking);
 
@@ -190,7 +194,7 @@ public class Firebase {
 
         tripRequest.setDepartureDate(departureDate);
         tripRequest.setMeetingDate(meetingDate);
-        tripRequest.setRouteWalking(points);
+        tripRequest.setRouteWalking(AdapterUtils.convertGeoPointsIntoHashMap(points));
 
         return tripRequest;
     }
@@ -270,6 +274,31 @@ public class Firebase {
             e.printStackTrace();
         }
         return trips;
+    }
+
+    public static List<TripRequest> getTripRequests(){
+        final List<TripRequest> tripRequests = new ArrayList<>();
+        db.collection("tripRequests").whereEqualTo("email",FAuth.getCurrentUser().getEmail()).get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                        for(DocumentSnapshot d:list){
+                            tripRequests.add(d.toObject(TripRequest.class));
+                        }
+                        synchronized (tripRequests){
+                            tripRequests.notify();
+                        }
+                    }
+                });
+        try {
+            synchronized (tripRequests) {
+                tripRequests.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return tripRequests;
     }
 
 }

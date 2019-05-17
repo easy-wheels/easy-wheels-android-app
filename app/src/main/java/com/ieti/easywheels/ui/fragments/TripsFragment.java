@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.model.Trip;
+import com.ieti.easywheels.model.TripRequest;
 import com.ieti.easywheels.network.Firebase;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class TripsFragment extends Fragment {
         scrollViewTrips = myFragmentView.findViewById(R.id.scrollViewTrips);
         linearLayoutTrips = myFragmentView.findViewById(R.id.linearLayoutTrips);
 
-        Thread thread = new Thread(){
+        Thread threadGetTripsAsDriver = new Thread(){
             @Override
             public void run(){
                 List<Trip> trips;
@@ -56,7 +57,24 @@ public class TripsFragment extends Fragment {
             }
         };
 
-        thread.start();
+        Thread threadGetTripRequests = new Thread(){
+            @Override
+            public void run(){
+                final List<TripRequest> tripRequests = Firebase.getTripRequests();
+                getActivity()
+                        .runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for(TripRequest t:tripRequests){
+                                    linearLayoutTrips.addView(new TripCard(t).onCreateView(inflater, container, savedInstanceState));
+                                }
+                                myFragmentView.invalidate();
+                            }
+                        });
+            }
+        };
+        threadGetTripsAsDriver.start();
+        threadGetTripRequests.start();
 
         return myFragmentView;
     }
