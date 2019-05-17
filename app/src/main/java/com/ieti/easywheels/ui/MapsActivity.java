@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -45,8 +47,8 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.firebase.firestore.GeoPoint;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
@@ -66,17 +68,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-
 
 import static com.ieti.easywheels.Constants.ERROR_DIALOG_REQUEST;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.ieti.easywheels.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends AppCompatActivity implements
+        OnMapReadyCallback,
+        LocationListener,
+        GoogleMap.OnMarkerDragListener {
 
     private GoogleMap mMap;
 
@@ -119,6 +122,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String hour;
     private Integer availableSeats;
     private Boolean isDriver;
+    private LatLng userSelectedPoint;
 
 
     @Override
@@ -141,7 +145,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         initPlacesSearchBox();
         confirmationButton = findViewById(R.id.floatingActionButton);
 
-//        isDriver = getIntent().getBooleanExtra("isDriver");
 
         confirmationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -166,12 +169,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initPlacesSearchBox() {
         searchBox = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.searchBox);
-        searchBox.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+        searchBox.setPlaceFields(Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME));
+        if (toUniversity) {
+            if (isDriver) {
+                searchBox.setHint(getString(R.string.searchBox_hint_toU_as_driver));
+            } else {
+                searchBox.setHint(getString(R.string.searchBox_hint_toU_as_passenger));
+            }
+        } else {
+            searchBox.setHint(getString(R.string.searchBox_hint_fromU));
+        }
+        searchBox.setCountry("CO");
         searchBox.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+                Log.i(TAG, place.toString());
+                userSelectedPoint = place.getLatLng();
+                mUserMarker.setPosition(userSelectedPoint);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        userSelectedPoint, DEFAULT_ZOOM));
+
             }
 
             @Override
@@ -341,6 +358,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMarkerDragListener(this);
         if (checkMapServices()) {
             if (mLocationPermissionGranted) {
                 getDeviceLocation();
@@ -406,22 +424,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         // Got last known location. In some rare situations, this can be null.
                         if (location != null) {
                             mLastKnownLocation = location;
-
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            mMap.addMarker(new MarkerOptions()
-                                            .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                                            .title("Posicion usuario")
+                            if (mUserMarker == null) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(mLastKnownLocation.getLatitude(),
+                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                mUserMarker = mMap.addMarker(new MarkerOptions()
+                                                .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                                                .draggable(true)
+                                                .title(getString(R.string.user_position_marker_title))
 //                                    .icon()
-                            );
+                                );
+                                mUserMarker.showInfoWindow();
+                            }
 
-//                          Todo Delete dummy vars
-                            toUniversity = true;
-                            day = "Monday";
-                            hour = "7:30";
-                            isDriver = true;
-                            availableSeats = 2;
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -583,5 +598,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        Geocoder geocoder;
+        List<Address> addresses = null;
+        geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            addresses = geocoder.getFromLocation(marker.getPosition().latitude, marker.getPosition().longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+        searchBox.setText(address);
     }
 }

@@ -64,9 +64,10 @@ public class ProgramTripFragment extends Fragment implements StepperFormListener
             intent.putExtra("isDriver", true);
             intent.putExtra("availableSeats", Integer.parseInt(typeStep.getStepData().split(" ")[1]));
         } else {
-            intent.putExtra("isDriver", true);
+            intent.putExtra("isDriver", false);
         }
         startActivity(intent);
+        getActivity().finish();
     }
 
     @Override
