@@ -64,7 +64,7 @@ public class TypeStep extends Step<String> {
         capacitySpinner.setAdapter(adapter);
         capacitySpinner.setEnabled(false);
         radioGroup.addView(capacitySpinner);
-
+        capacitySpinner.setSelection(0);
 
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
