@@ -1,5 +1,7 @@
 package com.ieti.easywheels.network;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ieti.easywheels.network.service.CloudFunctionsService;
 
 import retrofit2.Retrofit;
@@ -13,10 +15,11 @@ public class RetrofitConnection {
 
     private static void createCloudFunctionsConnection() {
         if (cloudFunctionsService == null) {
+            Gson gson = new GsonBuilder().setLenient().create();
             Retrofit retrofit =
                     new Retrofit.Builder()
                             .baseUrl(BASE_URL)
-                            .addConverterFactory(GsonConverterFactory.create())
+                            .addConverterFactory(GsonConverterFactory.create(gson))
                             .build();
 
             cloudFunctionsService = retrofit.create(CloudFunctionsService.class);

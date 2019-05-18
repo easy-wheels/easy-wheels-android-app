@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
 import com.ieti.easywheels.model.PassengerInfo;
@@ -51,6 +52,21 @@ public class Firebase {
     public static Task<Void> createUser(User user){
         return db.collection("users").document(user.getEmail()).set(user);
     }
+    public static void prueba(){
+        db.collection("trips")
+                .whereEqualTo("full",false)
+                .whereEqualTo("toUniversity",false)
+                .whereEqualTo("day","Monday")
+                .whereEqualTo("hour","13:00")
+                .whereArrayContains("geoHashes","d2g6fg")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        System.out.println(queryDocumentSnapshots.toObjects(Trip.class));
+                    }
+                });
+    }
 
     //TRIPS
 
@@ -83,7 +99,8 @@ public class Firebase {
         return db.collection("trips").document(trip.getDriverEmail() + " " + trip.getDay() + " " + trip.getHour()).set(trip);
     }
 
-    private static void addPassengerToTrip(final String email, final PassengerInfo passengerInfo, final String driverEmail, final String day, final String hour){
+    private static void addPassengerToTrip(final Boolean sync, final String email, final PassengerInfo passengerInfo, final String driverEmail, final String day, final String hour){
+
         db.collection("trips").document(driverEmail+" "+day+" "+hour).get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
@@ -91,9 +108,28 @@ public class Firebase {
                         Trip trip = documentSnapshot.toObject(Trip.class);
                         trip.getPassengers().add(email);
                         trip.getPassengersWithInfo().add(passengerInfo);
-                        db.collection("trips").document(driverEmail+" "+day+" "+hour).set(trip);
+                        db.collection("trips").document(driverEmail+" "+day+" "+hour).set(trip)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                if(sync) {
+                                    synchronized (sync) {
+                                        sync.notify();
+                                    }
+                                }
+                            }
+                        });
                     }
                 });
+        if(sync){
+            try {
+                synchronized (sync) {
+                    sync.wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static List<Trip> getTripsAsDriver() {
@@ -134,7 +170,8 @@ public class Firebase {
                             if (response.isSuccessful()) {
                                 String geoHash = response.body();
                                 tripRequest.setGeoHash(geoHash);
-
+                                System.out.println("GEO  HASH");
+                                System.out.println(geoHash);
                                 matchPassengerWithDriver(tripRequest);
                             }
                         } catch (IOException e) {
@@ -206,7 +243,14 @@ public class Firebase {
                         for (Thread thread : threads)
                             thread.join();
 
-//                        Todo AddPassengersToTrip
+                        for(TripRequest t:updatedPassengers){
+                            PassengerInfo passengerInfo = new PassengerInfo();
+                            passengerInfo.setMeetingDate(t.getMeetingDate());
+                            passengerInfo.setPassengerEmail(t.getEmail());
+                            passengerInfo.setMeetingPoint(t.getMeetingPoint());
+                            addPassengerToTrip(true,t.getEmail(),passengerInfo,trip.getDriverEmail(),trip.getDay(),trip.getHour());
+                        }
+
 //                        Todo call callback function to MapActivity and do UI stuff
 
                     } else{
@@ -226,9 +270,11 @@ public class Firebase {
             @Override
             public void run() {
                 try {
-                    Response<Trip> response = RetrofitConnection.getCloudFunctionsService().matchPassengerWithDriver(tripRequest).execute();
+                    Response<Object> response = RetrofitConnection.getCloudFunctionsService().matchPassengerWithDriver(tripRequest).execute();
+                    System.out.println(response);
                     if (response.isSuccessful() && response.code() == 200) {
-                        Trip trip = response.body();
+                        LinkedTreeMap<Object,Object> treeMap= (LinkedTreeMap<Object, Object>) response.body();
+                        Trip trip = AdapterUtils.convertLinkedTreeMapToTrip(treeMap);
                         HashMap<String,Double> meetingPoint = new HashMap<>();
                         meetingPoint.put("lat",trip.getMeetingPoint().getLatitude());
                         meetingPoint.put("lng",trip.getMeetingPoint().getLongitude());
@@ -242,7 +288,12 @@ public class Firebase {
                         if (trip.getPassengers() != null){
                             full = trip.getAvailableSeats() == trip.getPassengers().size() + 1;
                         }
-                        //Todo addPassengerToTrip
+
+                        PassengerInfo passengerInfo = new PassengerInfo();
+                        passengerInfo.setMeetingPoint(passenger.getMeetingPoint());
+                        passengerInfo.setPassengerEmail(passenger.getEmail());
+                        passengerInfo.setMeetingDate(passenger.getMeetingDate());
+                        addPassengerToTrip(false,passenger.getEmail(), passengerInfo,trip.getDriverEmail(),trip.getDay(),trip.getHour());
 
                     }
                 } catch (IOException e) {
@@ -277,6 +328,7 @@ public class Firebase {
         tripRequest.setDepartureDate(departureDate);
         tripRequest.setMeetingDate(meetingDate);
         tripRequest.setRouteWalking(AdapterUtils.convertGeoPointsIntoHashMap(points));
+        tripRequest.setMatched(true);
 
         return tripRequest;
     }

@@ -21,6 +21,6 @@ public interface CloudFunctionsService {
     Call<List<TripRequest>> matchDriverWithPassenger(@Body Trip trip);
 
     @POST("matchPassengerWithDriver")
-    Call<Trip> matchPassengerWithDriver(@Body TripRequest tripRequest);
+    Call<Object> matchPassengerWithDriver(@Body TripRequest tripRequest);
 
 }

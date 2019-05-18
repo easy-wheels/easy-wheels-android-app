@@ -4,8 +4,11 @@ import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.gson.internal.LinkedTreeMap;
+import com.ieti.easywheels.model.Trip;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,5 +52,36 @@ public class AdapterUtils {
         return list;
     }
 
+    public static Trip convertLinkedTreeMapToTrip(LinkedTreeMap<Object,Object> treeMap){
+        Trip trip = new Trip();
+        trip.setDay(treeMap.get("day").toString());
+        trip.setGeoHashes((List<String>) treeMap.get("geoHashes"));
+        Date date = new Date();
+        LinkedTreeMap<Object,Object> arrivalDate =(LinkedTreeMap<Object, Object>) treeMap.get("arrivalDate");
+        Double seconds =(Double) arrivalDate.get("_seconds");
+        date.setTime(0);
+        //date.setTime(seconds.intValue());
+        trip.setArrivalDate(DateUtils.getDatePlusSeconds(date,seconds.intValue()));
+        trip.setToUniversity((Boolean) treeMap.get("toUniversity"));
+        List<LinkedTreeMap<Object,Object>> route = (List<LinkedTreeMap<Object, Object>>) treeMap.get("route");
+        List<GeoPoint> geoPoints = new ArrayList<>();
+        for(LinkedTreeMap<Object,Object> pos:route){
+            geoPoints.add(new GeoPoint((Double) pos.get("_latitude"),(Double) pos.get("_longitude")));
+        }
+        trip.setRoute(geoPoints);
+        trip.setFull((Boolean) treeMap.get("full"));
+        Date date1 = new Date();
+        date1.setTime(0);
+        LinkedTreeMap<Object,Object> departureDate = (LinkedTreeMap<Object, Object>)treeMap.get("departureDate");
+        Double secondsDeparture = (Double) departureDate.get("_seconds");
+        trip.setDepartureDate(DateUtils.getDatePlusSeconds(date1,secondsDeparture.intValue()));
+
+        LinkedTreeMap<Object,Object> meetingPoint = (LinkedTreeMap<Object, Object>) treeMap.get("meetingPoint");
+        trip.setMeetingPoint(new GeoPoint((Double) meetingPoint.get("_latitude"),(Double) meetingPoint.get("_longitude")));
+        Double availableSeats = (Double) treeMap.get("availableSeats");
+        trip.setAvailableSeats(availableSeats.intValue());
+        trip.setDriverEmail(treeMap.get("driverEmail").toString());
+        return trip;
+    }
 
 }
