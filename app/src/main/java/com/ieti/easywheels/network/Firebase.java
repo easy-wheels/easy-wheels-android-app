@@ -52,6 +52,8 @@ public class Firebase {
         return db.collection("users").document(user.getEmail()).set(user);
     }
 
+    //TRIPS
+
     public static void driverCreateTravel(final Trip trip) {
         addTrip(trip).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -77,6 +79,49 @@ public class Firebase {
         });
     }
 
+    private static Task<Void> addTrip(Trip trip) {
+        return db.collection("trips").document(trip.getDriverEmail() + " " + trip.getDay() + " " + trip.getHour()).set(trip);
+    }
+
+    private static void addPassengerToTrip(final String email, final PassengerInfo passengerInfo, final String driverEmail, final String day, final String hour){
+        db.collection("trips").document(driverEmail+" "+day+" "+hour).get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Trip trip = documentSnapshot.toObject(Trip.class);
+                        trip.getPassengers().add(email);
+                        trip.getPassengersWithInfo().add(passengerInfo);
+                        db.collection("trips").document(driverEmail+" "+day+" "+hour).set(trip);
+                    }
+                });
+    }
+
+    public static List<Trip> getTripsAsDriver() {
+        final List<Trip> trips = new ArrayList<>();
+        db.collection("trips").whereEqualTo("driverEmail", FAuth.getCurrentUser().getEmail()).get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                        for(DocumentSnapshot d : list){
+                            trips.add(d.toObject(Trip.class));
+                        }
+                        synchronized (trips) {
+                            trips.notify();
+                        }
+                    }
+                });
+        try {
+            synchronized (trips) {
+                trips.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return trips;
+    }
+
+    //trip request
     public static void passengerRequestTravel(final TripRequest tripRequest) {
         addTripRequest(tripRequest).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -101,6 +146,37 @@ public class Firebase {
         });
     }
 
+
+    private static Task<Void> addTripRequest(TripRequest tripRequest) {
+        return db.collection("tripRequests").document(tripRequest.getEmail() + " " + tripRequest.getDay() + " " + tripRequest.getHour()).set(tripRequest);
+    }
+
+    public static List<TripRequest> getTripRequests(){
+        final List<TripRequest> tripRequests = new ArrayList<>();
+        db.collection("tripRequests").whereEqualTo("email",FAuth.getCurrentUser().getEmail()).get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                        for(DocumentSnapshot d:list){
+                            tripRequests.add(d.toObject(TripRequest.class));
+                        }
+                        synchronized (tripRequests){
+                            tripRequests.notify();
+                        }
+                    }
+                });
+        try {
+            synchronized (tripRequests) {
+                tripRequests.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return tripRequests;
+    }
+
+    //MATCHES
     private static void matchDriverWithPassenger(final Trip trip) {
         executorService.execute(new Runnable() {
             @Override
@@ -206,119 +282,12 @@ public class Firebase {
     }
 
 
-    private static Task<Void> addTripRequest(TripRequest tripRequest) {
-        return db.collection("tripRequests").document(tripRequest.getEmail() + " " + tripRequest.getDay() + " " + tripRequest.getHour()).set(tripRequest);
-    }
 
-    private static Task<Void> addTrip(Trip trip) {
-        return db.collection("trips").document(trip.getDriverEmail() + " " + trip.getDay() + " " + trip.getHour()).set(trip);
-    }
 
-    private static void addPassengerToTrip(final String email, final PassengerInfo passengerInfo, final String driverEmail, final String day, final String hour){
-        db.collection("trips").document(driverEmail+" "+day+" "+hour).get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        Trip trip = documentSnapshot.toObject(Trip.class);
-                        trip.getPassengers().add(email);
-                        trip.getPassengersWithInfo().add(passengerInfo);
-                        db.collection("trips").document(driverEmail+" "+day+" "+hour).set(trip);
-                    }
-                });
-    }
 
-    public static void addTripRequest(String email, String day, String hour, boolean toUniversity) {
-        db.collection("tripRequests")
-                .document(email + " " + day + " " + hour)
-                //TODO register new trip requests
-                .set(new TripRequest());
-    }
 
-    public static void getPendingTripsRequestByEmail() {
-        db.collection("tripRequests")
-                .whereEqualTo("email", "sergio.rodriguez-tor@mail.escuelaing.edu.co")
-                .whereEqualTo("matched", false)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                        for (DocumentSnapshot d : list) {
-                            TripRequest tripRequest = d.toObject(TripRequest.class);
-                            //TODO add pending trips
-                            System.out.println(tripRequest);
-                        }
-                    }
-                });
-    }
 
-    public static void getMatchedTripsRequestByEmail() {
-        db.collection("tripRequests")
-                .whereEqualTo("email", "sergio.rodriguez-tor@mail.escuelaing.edu.co")
-                .whereEqualTo("matched", true)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                        for (DocumentSnapshot d : list) {
-                            TripRequest tripRequest = d.toObject(TripRequest.class);
-                            //TODO add pending trips
-                            System.out.println(tripRequest);
-                        }
-                    }
-                });
-    }
 
-    public static List<Trip> getTripsAsDriver() {
-        final List<Trip> trips = new ArrayList<>();
-        db.collection("trips").whereEqualTo("driverEmail", FAuth.getCurrentUser().getEmail()).get()
-            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                    for(DocumentSnapshot d : list){
-                        trips.add(d.toObject(Trip.class));
-                    }
-                    synchronized (trips) {
-                        trips.notify();
-                    }
-                }
-            });
-        try {
-            synchronized (trips) {
-                trips.wait();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return trips;
-    }
-
-    public static List<TripRequest> getTripRequests(){
-        final List<TripRequest> tripRequests = new ArrayList<>();
-        db.collection("tripRequests").whereEqualTo("email",FAuth.getCurrentUser().getEmail()).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                        for(DocumentSnapshot d:list){
-                            tripRequests.add(d.toObject(TripRequest.class));
-                        }
-                        synchronized (tripRequests){
-                            tripRequests.notify();
-                        }
-                    }
-                });
-        try {
-            synchronized (tripRequests) {
-                tripRequests.wait();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return tripRequests;
-    }
 
 }
 
