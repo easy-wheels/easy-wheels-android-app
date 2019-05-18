@@ -87,10 +87,11 @@
     <string name="step_confirmation_text">Seleccionar direccion</string>
     <string name="confirmation_step_title">A continuacion seleccione su direccion de partida/destino</string>
     <string name="capacity_text_type_step">Con cuantos cupos cuentas?</string>
-    <string name="user_position_marker_title">Tu posicion</string>
+    <string name="user_position_marker_title">Arrastra a la ubicación deseada</string>
     <string name="searchBox_hint_toU_as_driver">Desde donde sales?</string>
     <string name="searchBox_hint_toU_as_passenger">Cual deseas que sea tu area de recogida?</string>
     <string name="searchBox_hint_fromU">Cual es tu lugar de destino?</string>
+    <string name="university_position_marker_title">Escuela Colombiana de ingenieria Julio Garavito</string>
 
 
 </resources>
