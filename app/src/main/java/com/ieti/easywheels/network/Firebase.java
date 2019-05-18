@@ -14,6 +14,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
+import com.ieti.easywheels.model.PassengerInfo;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
 import com.ieti.easywheels.model.User;
@@ -211,6 +212,19 @@ public class Firebase {
 
     private static Task<Void> addTrip(Trip trip) {
         return db.collection("trips").document(trip.getDriverEmail() + " " + trip.getDay() + " " + trip.getHour()).set(trip);
+    }
+
+    private static void addPassengerToTrip(final String email, final PassengerInfo passengerInfo, final String driverEmail, final String day, final String hour){
+        db.collection("trips").document(driverEmail+" "+day+" "+hour).get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Trip trip = documentSnapshot.toObject(Trip.class);
+                        trip.getPassengers().add(email);
+                        trip.getPassengersWithInfo().add(passengerInfo);
+                        db.collection("trips").document(driverEmail+" "+day+" "+hour).set(trip);
+                    }
+                });
     }
 
     public static void addTripRequest(String email, String day, String hour, boolean toUniversity) {

@@ -62,6 +62,23 @@ public class Trip {
         return day;
     }
 
+    public String dayInEnglish(){
+        switch(day){
+            case "Lunes":
+                return "Monday";
+            case "Martes":
+                return "Tuesday";
+            case "Miercoles":
+                return "Wednesday";
+            case "Jueves":
+                return "Thursday";
+            case "Viernes":
+                return "Friday";
+                default:
+                    return "Saturday";
+        }
+    }
+
     public void setDay(String day) {
         switch (day){
             case "Monday":
