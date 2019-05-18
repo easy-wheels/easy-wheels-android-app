@@ -49,7 +49,7 @@ public class TripsFragment extends Fragment {
                             @Override
                             public void run() {
                                 for(Trip t: finalTrips){
-                                    linearLayoutTrips.addView(new TripCard(t).onCreateView(inflater, container, savedInstanceState));
+                                    linearLayoutTrips.addView(new TripCard(t, myFragmentView).onCreateView(inflater, container, savedInstanceState));
                                 }
                                 myFragmentView.invalidate();
                             }
@@ -66,7 +66,7 @@ public class TripsFragment extends Fragment {
                             @Override
                             public void run() {
                                 for(TripRequest t:tripRequests){
-                                    linearLayoutTrips.addView(new TripCard(t).onCreateView(inflater, container, savedInstanceState));
+                                    linearLayoutTrips.addView(new TripCard(t, myFragmentView).onCreateView(inflater, container, savedInstanceState));
                                 }
                                 myFragmentView.invalidate();
                             }
@@ -78,5 +78,6 @@ public class TripsFragment extends Fragment {
 
         return myFragmentView;
     }
+
 
 }

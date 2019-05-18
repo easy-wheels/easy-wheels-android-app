@@ -53,26 +53,7 @@ public class TripRequest {
     }
 
     public void setDay(String day) {
-        switch (day){
-            case "Monday":
-                this.day="Lunes";
-                break;
-            case "Tuesday":
-                this.day="Martes";
-                break;
-            case "Wednesday":
-                this.day="Miercoles";
-                break;
-            case "Thursday":
-                this.day="Jueves";
-                break;
-            case "Friday":
-                this.day="Viernes";
-                break;
-            case "Saturday":
-                this.day="Sabado";
-                break;
-        }
+        this.day = day;
     }
 
     public String getEmail() {

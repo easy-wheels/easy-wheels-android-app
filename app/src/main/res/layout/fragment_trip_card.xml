@@ -8,12 +8,15 @@
     tools:context=".ui.fragments.TripCard">
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardTrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/mtrl_card_spacing"
         android:layout_marginTop="@dimen/mtrl_card_spacing"
         android:layout_marginRight="@dimen/mtrl_card_spacing"
-        android:clickable="true">
+        android:clickable="true"
+        android:focusable="auto"
+        android:focusableInTouchMode="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

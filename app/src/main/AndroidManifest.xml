@@ -9,7 +9,6 @@
          You don't need to add them explicitly to your manifest
          android.permission.INTERNET or android.permission.ACCESS_NETWORK_STATE
     -->
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
@@ -19,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.CreateAccountActivity"></activity>
+        <activity android:name=".ui.TripInfoActivity"></activity>
+        <activity android:name=".ui.CreateAccountActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -53,15 +53,20 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <!-- handle website links -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT"/>
+
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="easy-wheels-front-end.firebaseapp.com"/>
+
+                <data
+                    android:host="easy-wheels-front-end.firebaseapp.com"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
     </application>
