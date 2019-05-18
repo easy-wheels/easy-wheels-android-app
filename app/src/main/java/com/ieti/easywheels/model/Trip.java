@@ -62,27 +62,25 @@ public class Trip {
         return day;
     }
 
-    public void setDay(String day) {
-        switch (day){
-            case "Monday":
-                this.day="Lunes";
-                break;
-            case "Tuesday":
-                this.day="Martes";
-                break;
-            case "Wednesday":
-                this.day="Miercoles";
-                break;
-            case "Thursday":
-                this.day="Jueves";
-                break;
-            case "Friday":
-                this.day="Viernes";
-                break;
-            case "Saturday":
-                this.day="Sabado";
-                break;
+    public String dayInEnglish(){
+        switch(day){
+            case "Lunes":
+                return "Monday";
+            case "Martes":
+                return "Tuesday";
+            case "Miercoles":
+                return "Wednesday";
+            case "Jueves":
+                return "Thursday";
+            case "Viernes":
+                return "Friday";
+                default:
+                    return "Saturday";
         }
+    }
+
+    public void setDay(String day) {
+        this.day=day;
     }
 
     public Date getDepartureDate() {
