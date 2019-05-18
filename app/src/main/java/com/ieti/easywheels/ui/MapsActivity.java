@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -15,8 +16,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,6 +37,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -53,6 +58,7 @@ import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
 import com.google.maps.internal.PolylineEncoding;
+import com.google.maps.model.DirectionsLeg;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.TravelMode;
@@ -95,7 +101,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     // Map vars
     private final LatLng mUniversityLocation = new LatLng(4.782715, -74.042611);
-    private static final int DEFAULT_ZOOM = 13;
+    private static final int DEFAULT_ZOOM = 15;
 
     //Google API
     private static GeoApiContext mGeoApiContext;
@@ -109,12 +115,15 @@ public class MapsActivity extends AppCompatActivity implements
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
     private LocationManager locationManager;
-    private String bestProvider;
     private AutocompleteSupportFragment searchBox;
     private FloatingActionButton confirmationButton;
 
     private Marker mUserMarker;
+    private Marker mUniversityMarker;
     private Polyline polyline;
+    private DirectionsLeg directionsLeg;
+
+    private Boolean isMarkerGragged;
 
     //TripInfo
     private Boolean toUniversity;
@@ -148,22 +157,13 @@ public class MapsActivity extends AppCompatActivity implements
 
         confirmationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                executorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isDriver) {
-                            setDriverDirectionRoute();
-                        } else {
-                            passengerRequestTravel();
-                        }
-                    }
-                });
+                if (isDriver) {
+                    setDriverDirectionRoute();
+                } else {
+                    passengerRequestTravel();
+                }
             }
         });
-
-
-
-
 
     }
 
@@ -183,6 +183,7 @@ public class MapsActivity extends AppCompatActivity implements
         searchBox.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
+                isMarkerGragged = true;
                 Log.i(TAG, place.toString());
                 userSelectedPoint = place.getLatLng();
                 mUserMarker.setPosition(userSelectedPoint);
@@ -213,7 +214,7 @@ public class MapsActivity extends AppCompatActivity implements
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        isMarkerGragged = false;
         String apiKey = getString(R.string.google_maps_key);
 
         if (mGeoApiContext == null) {
@@ -237,13 +238,12 @@ public class MapsActivity extends AppCompatActivity implements
     @SuppressWarnings("MissingPermission")
     private void getGpsLocation() {
         updateLocationUI();
-        locationManager.requestLocationUpdates(bestProvider, 1000, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
     }
 
     public boolean isGpsEnabled() {
         boolean isEnabled = true;
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        bestProvider = String.valueOf(locationManager.getBestProvider(new Criteria(), true));
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessageNoGps();
             isEnabled = false;
@@ -322,9 +322,9 @@ public class MapsActivity extends AppCompatActivity implements
 
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("This application requires GPS to work properly, do you want to enable it?")
+        builder.setMessage("Necesitamos saber donde estas para ubicarte en el mapa, deseas habilitar el GPS?")
                 .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                         Intent enableGpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivityForResult(enableGpsIntent, PERMISSIONS_REQUEST_ENABLE_GPS);
@@ -367,6 +367,11 @@ public class MapsActivity extends AppCompatActivity implements
             }
             updateLocationUI();
         }
+        mUniversityMarker = mMap.addMarker(new MarkerOptions()
+                        .position(mUniversityLocation)
+                        .title(getString(R.string.university_position_marker_title))
+//                                    .icon()
+        );
 
     }
 
@@ -395,7 +400,6 @@ public class MapsActivity extends AppCompatActivity implements
         }
         try {
             if (mLocationPermissionGranted) {
-                ;
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -416,36 +420,35 @@ public class MapsActivity extends AppCompatActivity implements
          * cases when a location is not available.
          */
         try {
-            if (mLocationPermissionGranted) {
+            if (mLocationPermissionGranted && !isMarkerGragged) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations, this can be null.
+                        LatLng position;
                         if (location != null) {
                             mLastKnownLocation = location;
-                            if (mUserMarker == null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(mLastKnownLocation.getLatitude(),
-                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                                mUserMarker = mMap.addMarker(new MarkerOptions()
-                                                .position(new LatLng(location.getLatitude(), location.getLongitude()))
-                                                .draggable(true)
-                                                .title(getString(R.string.user_position_marker_title))
-//                                    .icon()
-                                );
-                                mUserMarker.showInfoWindow();
-                            }
-
-
+                            position = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.getUiSettings().setMyLocationButtonEnabled(true);
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
-                            mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mUniversityLocation, DEFAULT_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
-
+                            position = mUniversityLocation;
                             getGpsLocation();
                         }
+                        if (mUserMarker == null) {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+                            mUserMarker = mMap.addMarker(new MarkerOptions()
+                                            .position(position)
+                                            .draggable(true)
+                                            .title(getString(R.string.user_position_marker_title))
+//                                    .icon()
+                            );
+                        } else {
+                            moveMarker(mUserMarker, position, false);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+                        }
+                        mUserMarker.showInfoWindow();
                     }
                 });
             }
@@ -460,48 +463,96 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void run() {
                 Log.d(TAG, "run: result routes: " + result.routes.length);
+                DirectionsRoute route = result.routes[0];
+                directionsLeg = route.legs[0];
+                Log.d(TAG, "run: leg: " + directionsLeg.toString());
+                List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
 
-                for (DirectionsRoute route : result.routes) {
-                    Log.d(TAG, "run: leg: " + route.legs[0].toString());
-                    List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
+                List<LatLng> newDecodedPath = new ArrayList<>();
 
-                    List<LatLng> newDecodedPath = new ArrayList<>();
-
-                    // This loops through all the LatLng coordinates of ONE polyline.
-                    for (com.google.maps.model.LatLng latLng : decodedPath) {
-                        newDecodedPath.add(new LatLng(latLng.lat, latLng.lng));
-                    }
+                // This loops through all the LatLng coordinates of ONE polyline.
+                for (com.google.maps.model.LatLng latLng : decodedPath) {
+                    newDecodedPath.add(new LatLng(latLng.lat, latLng.lng));
+                }
+                if (polyline == null) {
                     polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                     polyline.setColor(ContextCompat.getColor(MapsActivity.this, R.color.colorAccent));
                     polyline.setClickable(true);
+                }else{
+                    polyline.setPoints(newDecodedPath);
+                }
+            }
+        });
+    }
+
+    public void moveMarker(final Marker marker, final LatLng toPosition, final boolean hideMarker) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = mMap.getProjection();
+        Point startPoint = proj.toScreenLocation(marker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 500;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t)
+                        * startLatLng.latitude;
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarker) {
+                        marker.setVisible(false);
+                    } else {
+                        marker.setVisible(true);
+                    }
                 }
             }
         });
     }
 
     private void setDriverDirectionRoute() {
-        LatLng origin, destination;
-        Date arrivalDate, departureDate;
+        final LatLng origin, destination;
+        LatLng userPosition = mUserMarker.getPosition();
         if (toUniversity) {
-            origin = AdapterUtils.convertLocationToLatLng(mLastKnownLocation);
+            origin = userPosition;
             destination = mUniversityLocation;
         } else {
             origin = mUniversityLocation;
-            destination = AdapterUtils.convertLocationToLatLng(mLastKnownLocation);
+            destination = userPosition;
         }
-        Date dateUniversity = DateUtils.getNextDateFromDayAndHour(day, hour);
-        DirectionsResult result = calculateRoute(TravelMode.DRIVING, origin, destination, dateUniversity);
-        if (toUniversity) {
-            arrivalDate = dateUniversity;
-            departureDate = DateUtils.getDatePlusSeconds(arrivalDate, (int) -result.routes[0].legs[0].duration.inSeconds);
-        } else {
-            departureDate = dateUniversity;
-            arrivalDate = DateUtils.getDatePlusSeconds(departureDate, (int) result.routes[0].legs[0].duration.inSeconds);
-        }
-        addPolylineToMap(result);
-        String message = "Duracion estimada: " + result.routes[0].legs[0].duration.toString();
-
-        driverCreateTravel(departureDate, arrivalDate, result);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Date arrivalDate, departureDate;
+                Date dateUniversity = DateUtils.getNextDateFromDayAndHour(day, hour);
+                final DirectionsResult result = calculateRoute(TravelMode.DRIVING, origin, destination, dateUniversity);
+                if (toUniversity) {
+                    arrivalDate = dateUniversity;
+                    departureDate = DateUtils.getDatePlusSeconds(arrivalDate, (int) -result.routes[0].legs[0].duration.inSeconds);
+                } else {
+                    departureDate = dateUniversity;
+                    arrivalDate = DateUtils.getDatePlusSeconds(departureDate, (int) result.routes[0].legs[0].duration.inSeconds);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        addPolylineToMap(result);
+                    }
+                });
+                driverCreateTravel(departureDate, arrivalDate, result);
+            }
+        });
     }
 
     private void setPassengerDirectionRoute() {
@@ -528,6 +579,7 @@ public class MapsActivity extends AppCompatActivity implements
         }
         return null;
     }
+
     public static DirectionsResult calculateRoute(TravelMode travelMode, LatLng origin, LatLng destination) {
         DirectionsApiRequest directionsApiRequest = new DirectionsApiRequest(mGeoApiContext);
         try {
@@ -581,8 +633,9 @@ public class MapsActivity extends AppCompatActivity implements
         locationManager.removeUpdates(this);
 
         mLastKnownLocation = location;
-        Toast.makeText(MapsActivity.this, "latitude:" + mLastKnownLocation.getLatitude() + " longitude:" + mLastKnownLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(MapsActivity.this, "Debug latitude:" + mLastKnownLocation.getLatitude() + " longitude:" + mLastKnownLocation.getLongitude(), Toast.LENGTH_SHORT).show();
         getDeviceLocation();
+
     }
 
     @Override
@@ -592,12 +645,14 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        Log.d(TAG, "Listener Working provider.");
+        getDeviceLocation();
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        Log.d(TAG, "Listener Working provider Disabled.");
+        isGpsEnabled();
     }
 
     @Override
@@ -615,7 +670,7 @@ public class MapsActivity extends AppCompatActivity implements
         Geocoder geocoder;
         List<Address> addresses = null;
         geocoder = new Geocoder(this, Locale.getDefault());
-
+        isMarkerGragged = true;
         try {
             addresses = geocoder.getFromLocation(marker.getPosition().latitude, marker.getPosition().longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
         } catch (IOException e) {
