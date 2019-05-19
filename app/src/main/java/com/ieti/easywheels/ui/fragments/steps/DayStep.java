@@ -16,7 +16,7 @@ public class DayStep extends Step<String> {
         super(title);
     }
 
-    private static String[] DAYS = {"Monday", "Thuesday", "Wenesday", "Thursday", "Friday", "Saturday"};
+    private static String[] DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
     private Spinner daySpinner;
 
     @Override
