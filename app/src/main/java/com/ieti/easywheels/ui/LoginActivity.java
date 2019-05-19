@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -15,6 +16,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout textInputEmail;
     private TextInputLayout textInputPassword;
     private AlertDialog alertDialog;
+    private Button buttonLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         textInputEmail = findViewById(R.id.textInputEmail);
         textInputPassword = findViewById(R.id.textInputPassword);
+        buttonLogin = findViewById(R.id.login_button);
+
     }
 
     private void buildDialog(String message) {
@@ -126,7 +131,11 @@ public class LoginActivity extends AppCompatActivity {
 
     public void login(View v) {
         v.setEnabled(false);
+        Snackbar.make(v, R.string.wait, Snackbar.LENGTH_SHORT)
+                .show();
+        buttonLogin.setEnabled(false);
         signIn(textInputEmail.getEditText().getText().toString(), textInputPassword.getEditText().getText().toString());
+        buttonLogin.setEnabled(true);
         v.setEnabled(true);
     }
 

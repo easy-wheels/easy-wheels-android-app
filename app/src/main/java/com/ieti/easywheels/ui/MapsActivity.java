@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -53,6 +52,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -91,6 +91,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     private static final String TAG = "MapActivity";
     private final ExecutorService executorService = Executors.newFixedThreadPool(2);
+    private AlertDialog alertDialog;
 
     //State Vars
     private boolean mLocationPermissionGranted;
@@ -133,6 +134,8 @@ public class MapsActivity extends AppCompatActivity implements
     private Boolean isDriver;
     private LatLng userSelectedPoint;
 
+    private DirectionsResult route;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,14 +160,18 @@ public class MapsActivity extends AppCompatActivity implements
 
         confirmationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
+                        .show();
+                confirmationButton.setEnabled(false);
                 if (isDriver) {
                     setDriverDirectionRoute();
                 } else {
                     passengerRequestTravel();
                 }
+                buildDialog(getApplicationContext().getResources().getString(R.string.query_realize_message));
+                alertDialog.show();
             }
         });
-
     }
 
     private void initPlacesSearchBox() {
@@ -189,7 +196,6 @@ public class MapsActivity extends AppCompatActivity implements
                 mUserMarker.setPosition(userSelectedPoint);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         userSelectedPoint, DEFAULT_ZOOM));
-
             }
 
             @Override
@@ -378,6 +384,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
         if (mMap == null) {
             return;
         }
@@ -389,7 +396,9 @@ public class MapsActivity extends AppCompatActivity implements
             }
             updateLocationUI();
         }
+
     }
+
 
     /**
      * Updates the map's UI settings based on whether the user has granted location permission.
@@ -448,7 +457,11 @@ public class MapsActivity extends AppCompatActivity implements
                             moveMarker(mUserMarker, position, false);
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
                         }
+
                         mUserMarker.showInfoWindow();
+                        if(isDriver){
+                            drawPolyLine();
+                        }
                     }
                 });
             }
@@ -536,21 +549,18 @@ public class MapsActivity extends AppCompatActivity implements
             public void run() {
                 Date arrivalDate, departureDate;
                 Date dateUniversity = DateUtils.getNextDateFromDayAndHour(day, hour);
-                final DirectionsResult result = calculateRoute(TravelMode.DRIVING, origin, destination, dateUniversity);
+                if(route==null){
+                    drawPolyLine();
+                }
                 if (toUniversity) {
                     arrivalDate = dateUniversity;
-                    departureDate = DateUtils.getDatePlusSeconds(arrivalDate, (int) -result.routes[0].legs[0].duration.inSeconds);
+                    departureDate = DateUtils.getDatePlusSeconds(arrivalDate, (int) -route.routes[0].legs[0].duration.inSeconds);
                 } else {
                     departureDate = dateUniversity;
-                    arrivalDate = DateUtils.getDatePlusSeconds(departureDate, (int) result.routes[0].legs[0].duration.inSeconds);
+                    arrivalDate = DateUtils.getDatePlusSeconds(departureDate, (int) route.routes[0].legs[0].duration.inSeconds);
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        addPolylineToMap(result);
-                    }
-                });
-                driverCreateTravel(departureDate, arrivalDate, result);
+
+                driverCreateTravel(departureDate, arrivalDate, route);
             }
         });
     }
@@ -597,6 +607,33 @@ public class MapsActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void drawPolyLine(){
+        Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
+                .show();
+        final LatLng userPosition = mUserMarker.getPosition();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                final LatLng origin, destination;
+                if (toUniversity) {
+                    origin = userPosition;
+                    destination = mUniversityLocation;
+                } else {
+                    origin = mUniversityLocation;
+                    destination = userPosition;
+                }
+                Date dateUniversity = DateUtils.getNextDateFromDayAndHour(day, hour);
+                route = calculateRoute(TravelMode.DRIVING, origin, destination, dateUniversity);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        addPolylineToMap(route);
+                    }
+                });
+            }
+        });
     }
 
     //Firebase functions
@@ -667,6 +704,9 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
+        if(isDriver){
+            drawPolyLine();
+        }
         Geocoder geocoder;
         List<Address> addresses = null;
         geocoder = new Geocoder(this, Locale.getDefault());
@@ -679,5 +719,22 @@ public class MapsActivity extends AppCompatActivity implements
 
         String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
         searchBox.setText(address);
+    }
+
+    private void buildDialog(String message) {
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setTitle(getApplicationContext().getResources().getString(R.string.query_realize));
+        builder1.setMessage(message);
+        builder1.setCancelable(true);
+        builder1.setNegativeButton("Ok",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent intent = new Intent(getApplicationContext(),LaunchActivity.class);
+                        startActivity(intent);
+                        finish();
+                        return;
+                    }
+                });
+        alertDialog = builder1.create();
     }
 }
