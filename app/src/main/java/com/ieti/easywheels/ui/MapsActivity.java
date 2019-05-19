@@ -611,8 +611,10 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     private void drawPolyLine(){
-        Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
-                .show();
+        if(getCurrentFocus()!=null) {
+            Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
+                    .show();
+        }
         final LatLng userPosition = mUserMarker.getPosition();
         executorService.execute(new Runnable() {
             @Override
