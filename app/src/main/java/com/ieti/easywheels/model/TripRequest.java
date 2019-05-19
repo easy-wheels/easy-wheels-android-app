@@ -145,8 +145,11 @@ public class TripRequest {
                 ", hour='" + hour + '\'' +
                 ", matched=" + matched +
                 ", toUniversity=" + toUniversity +
+                ", departureDate=" + departureDate +
+                ", meetingDate=" + meetingDate +
                 ", userPosition=" + userPosition +
                 ", meetingPoint=" + meetingPoint +
+                ", routeWalking=" + routeWalking +
                 '}';
     }
 }

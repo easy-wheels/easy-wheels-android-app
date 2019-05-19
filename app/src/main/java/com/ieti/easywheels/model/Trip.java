@@ -178,6 +178,7 @@ public class Trip {
                 ", passengersWithInfo=" + passengersWithInfo +
                 ", route=" + route +
                 ", toUniversity=" + toUniversity +
+                ", meetingPoint=" + meetingPoint +
                 '}';
     }
 }
