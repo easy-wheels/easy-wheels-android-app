@@ -18,7 +18,7 @@ public interface CloudFunctionsService {
     Call<String> setGeoHashToTripRequest(@Body TripRequest tripRequest);
 
     @POST("matchDriverWithPassenger")
-    Call<List<TripRequest>> matchDriverWithPassenger(@Body Trip trip);
+    Call<Object> matchDriverWithPassenger(@Body Trip trip);
 
     @POST("matchPassengerWithDriver")
     Call<Object> matchPassengerWithDriver(@Body TripRequest tripRequest);

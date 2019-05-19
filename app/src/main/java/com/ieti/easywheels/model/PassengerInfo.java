@@ -1,17 +1,23 @@
 package com.ieti.easywheels.model;
 
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
-import java.util.HashMap;
 
 public class PassengerInfo {
 
     private @ServerTimestamp Date meetingDate;
-    private HashMap<String,Double> meetingPoint;
+    private GeoPoint meetingPoint;
     private String passengerEmail;
 
     public PassengerInfo() {
+    }
+
+    public PassengerInfo(Date meetingDate, GeoPoint meetingPoint, String passengerEmail) {
+        this.meetingDate = meetingDate;
+        this.meetingPoint = meetingPoint;
+        this.passengerEmail = passengerEmail;
     }
 
     public Date getMeetingDate() {
@@ -22,11 +28,11 @@ public class PassengerInfo {
         this.meetingDate = meetingDate;
     }
 
-    public HashMap<String, Double> getMeetingPoint() {
+    public GeoPoint getMeetingPoint() {
         return meetingPoint;
     }
 
-    public void setMeetingPoint(HashMap<String, Double> meetingPoint) {
+    public void setMeetingPoint(GeoPoint meetingPoint) {
         this.meetingPoint = meetingPoint;
     }
 
