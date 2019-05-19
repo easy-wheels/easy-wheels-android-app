@@ -95,6 +95,7 @@
     <string name="query_realize">¡Realizado!</string>
     <string name="query_realize_message">Podras ver el estado de tu solicitud en \"Viajes\"</string>
     <string name="trip_info">Informacion de viaje</string>
+    <string name="more_info">Mas Información</string>
 
 
 </resources>
