@@ -670,6 +670,8 @@ public class MapsActivity extends AppCompatActivity implements
 
     }
 
+
+
     @Override
     public void onLocationChanged(Location location) {
         locationManager.removeUpdates(this);

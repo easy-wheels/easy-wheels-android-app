@@ -71,6 +71,31 @@ public class Firebase {
                 });
     }
 
+    public static String getNameByEmail(String email){
+        final String[] name = {""};
+        final Object object = new Object();
+        db.collection("users")
+                .document(email)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        User user = documentSnapshot.toObject(User.class);
+                        name[0] = user.getName();
+                        synchronized (object) {
+                            object.notify();
+                        }
+                    }
+                });
+        try {
+            synchronized (object) {
+                object.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return name[0];
+    }
     //TRIPS
 
     public static void driverCreateTravel(final Trip trip) {
