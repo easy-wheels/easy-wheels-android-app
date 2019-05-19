@@ -40,15 +40,15 @@ public class LaunchActivity extends AppCompatActivity {
         trip.setArrivalDate(DateUtils.getNextDateFromDayAndHour("Monday","13:00"));
         trip.setDepartureDate(DateUtils.getNextDateFromDayAndHour("Monday","13:00"));
         Firebase.driverCreateTravel(trip);**/
-        TripRequest tripRequest = new TripRequest();
-        tripRequest.setEmail(Firebase.getFAuth().getCurrentUser().getEmail());
-        tripRequest.setDay("Monday");
-        tripRequest.setHour("13:00");
-        tripRequest.setToUniversity(false);
-        tripRequest.setArrivalDate(DateUtils.getNextDateFromDayAndHour("Monday","13:00"));
-        tripRequest.setDepartureDate(DateUtils.getNextDateFromDayAndHour("Monday","13:00"));
-        tripRequest.setUserPosition(new GeoPoint(4.72224,-74.05114));
-        Firebase.passengerRequestTravel(tripRequest);
+//        TripRequest tripRequest = new TripRequest();
+//        tripRequest.setEmail(Firebase.getFAuth().getCurrentUser().getEmail());
+//        tripRequest.setDay("Monday");
+//        tripRequest.setHour("13:00");
+//        tripRequest.setToUniversity(false);
+//        tripRequest.setArrivalDate(DateUtils.getNextDateFromDayAndHour("Monday","13:00"));
+//        tripRequest.setDepartureDate(DateUtils.getNextDateFromDayAndHour("Monday","13:00"));
+//        tripRequest.setUserPosition(new GeoPoint(4.72224,-74.05114));
+//        Firebase.passengerRequestTravel(tripRequest);
         //Firebase.prueba();
         finish();
     }
