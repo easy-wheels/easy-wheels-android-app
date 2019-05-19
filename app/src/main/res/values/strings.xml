@@ -32,19 +32,19 @@
 
     <string name="passanger_radiobutton_text">Soy pasajero</string>
     <string name="driver_radiobutton_text">Soy conductor</string>
-    <string name="type_of_usser_step_error">Debes seleccionar el rol que desempeñarás.</string>
-    <string name="passanger_type_step_title">Cual sera tu rol en este viaje?</string>
-    <string name="destination_step_title">Sales o te diriges hacia la universidad?</string>
+    <string name="type_of_usser_step_error">Debes seleccionar un rol.</string>
+    <string name="passanger_type_step_title">¿Conductor o Pasajero?</string>
+    <string name="destination_step_title">¿Sales o te diriges hacia la universidad?</string>
     <string name="to_univerdsity_radiobutton_text">Salgo de la univeridad</string>
     <string name="from_university_radiobutton_text">Voy hacia la universidad</string>
     <string name="destination_step_error">Debes elegir tu destino</string>
 
-    <string name="day_step_title">Que día realizaras tu viaje?</string>
+    <string name="day_step_title">¿Que día viajarás?</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="empty_step">(Vacío)</string>
-    <string name="hour_step_title">Cual es tu hora de llegada/salida de la universidad?</string>
+    <string name="hour_step_title">¿Cual es tu hora de llegada/salida de la universidad?</string>
 
     <string-array name="capacity_array">
         <item>1 Cupo</item>
@@ -92,6 +92,8 @@
     <string name="searchBox_hint_toU_as_passenger">Cual deseas que sea tu area de recogida?</string>
     <string name="searchBox_hint_fromU">Cual es tu lugar de destino?</string>
     <string name="university_position_marker_title">Escuela Colombiana de ingenieria Julio Garavito</string>
+    <string name="query_realize">¡Realizado!</string>
+    <string name="query_realize_message">Podras ver el estado de tu solicitud en \"Viajes\"</string>
 
 
 </resources>
