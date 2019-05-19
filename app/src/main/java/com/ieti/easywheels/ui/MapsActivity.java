@@ -160,8 +160,10 @@ public class MapsActivity extends AppCompatActivity implements
 
         confirmationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
-                        .show();
+                if(getCurrentFocus()!=null) {
+                    Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
+                            .show();
+                }
                 confirmationButton.setEnabled(false);
                 if (isDriver) {
                     setDriverDirectionRoute();

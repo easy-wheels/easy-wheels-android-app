@@ -94,6 +94,7 @@
     <string name="university_position_marker_title">Escuela Colombiana de ingenieria Julio Garavito</string>
     <string name="query_realize">¡Realizado!</string>
     <string name="query_realize_message">Podras ver el estado de tu solicitud en \"Viajes\"</string>
+    <string name="trip_info">Informacion de viaje</string>
 
 
 </resources>
