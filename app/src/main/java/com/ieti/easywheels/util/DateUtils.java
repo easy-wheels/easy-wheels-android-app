@@ -25,6 +25,7 @@ public class DateUtils {
 
     public static Date getNextDateFromDayAndHour(String day, String hour) {
         GregorianCalendar nowDate = new GregorianCalendar();
+        System.out.println(day);
         Integer dayOfWeek = days.get(day);
         int dayOfMonth = nowDate.get(Calendar.DAY_OF_MONTH) + (dayOfWeek + 7 - (nowDate.get(Calendar.DAY_OF_WEEK)-1)) % 7;
         String[] hourAndMinutes = hour.split(":");

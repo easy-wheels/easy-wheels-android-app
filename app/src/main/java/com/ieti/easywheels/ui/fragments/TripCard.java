@@ -2,7 +2,6 @@ package com.ieti.easywheels.ui.fragments;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import com.google.android.material.card.MaterialCardView;
 import com.ieti.easywheels.R;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
-import com.ieti.easywheels.ui.TripInfoActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,6 +60,7 @@ public class TripCard extends Fragment {
             public void onClick(View v) {
                 //Intent intent = new Intent(parentView.getContext(), TripInfoActivity.class);
                 //startActivity(intent);
+                System.out.println("Hols");
             }
         });
         TextView textModalityAndDate = myView.findViewById(R.id.textModalityAndDate);
