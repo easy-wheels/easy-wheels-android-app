@@ -22,6 +22,10 @@ public class AdapterUtils {
         return new GeoPoint(latLng.lat, latLng.lng);
     }
 
+    public static GeoPoint convertLatLngToGeoPoint(LatLng latLng) {
+        return new GeoPoint(latLng.latitude, latLng.longitude);
+    }
+
     public static GeoPoint convertLocationToGeoPoint(Location location) {
         return new GeoPoint(location.getLatitude(), location.getLongitude());
     }
@@ -43,8 +47,8 @@ public class AdapterUtils {
         date.setTime(seconds.longValue() * 1000);
         trip.setArrivalDate(date);
 
-        Double availableSeats = (Double) treeMap.get("availableSeats");
-        trip.setAvailableSeats(availableSeats.intValue());
+        Integer availableSeats = Integer.valueOf((String) treeMap.get("availableSeats"));
+        trip.setAvailableSeats(availableSeats);
 
         trip.setDay(treeMap.get("day").toString());
 
