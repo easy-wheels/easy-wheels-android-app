@@ -29,13 +29,13 @@ public class DestinationStep extends Step<Boolean> {
 
         fromUniversityRadioButton = new RadioButton(getContext());
         fromUniversityRadioButton.setId(FROMU_RADIO_BUTTON_ID);
-        fromUniversityRadioButton.setText(getContext().getString(R.string.from_university_radiobutton_text));
+        fromUniversityRadioButton.setText(getContext().getString(R.string.to_univerdsity_radiobutton_text));
         fromUniversityRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         radioGroup.addView(fromUniversityRadioButton);
 
         toUniversityRadioButton = new RadioButton(getContext());
         toUniversityRadioButton.setId(TOU_RADIO_BUTTON_ID);
-        toUniversityRadioButton.setText(getContext().getString(R.string.to_univerdsity_radiobutton_text));
+        toUniversityRadioButton.setText(getContext().getString(R.string.from_university_radiobutton_text));
         toUniversityRadioButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         radioGroup.addView(toUniversityRadioButton);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -71,9 +71,9 @@ public class DestinationStep extends Step<Boolean> {
         // This string will be displayed in the subtitle of the step whenever the step gets closed.
         String checkedRadioButtonText = "";
         if (radioGroup.getCheckedRadioButtonId() == TOU_RADIO_BUTTON_ID) {
-            checkedRadioButtonText = getContext().getResources().getString(R.string.to_univerdsity_radiobutton_text);
-        } else if (radioGroup.getCheckedRadioButtonId() == FROMU_RADIO_BUTTON_ID) {
             checkedRadioButtonText = getContext().getResources().getString(R.string.from_university_radiobutton_text);
+        } else if (radioGroup.getCheckedRadioButtonId() == FROMU_RADIO_BUTTON_ID) {
+            checkedRadioButtonText = getContext().getResources().getString(R.string.to_univerdsity_radiobutton_text);
         }
         return !checkedRadioButtonText.isEmpty() ? checkedRadioButtonText : getContext().getString(R.string.empty_step);
     }

@@ -4,7 +4,6 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 public class TripRequest {
@@ -22,9 +21,9 @@ public class TripRequest {
     private Date meetingDate;
 
     private GeoPoint userPosition;
-    private HashMap<String,Double> meetingPoint;
+    private GeoPoint meetingPoint;
 
-    private List<HashMap<String,Double>> routeWalking;
+    private List<GeoPoint> routeWalking;
 
     public TripRequest() {
     }
@@ -104,20 +103,19 @@ public class TripRequest {
         this.toUniversity = toUniversity;
     }
 
-    public HashMap<String, Double> getMeetingPoint() {
+    public GeoPoint getMeetingPoint() {
         return meetingPoint;
     }
 
-    public void setMeetingPoint(HashMap<String, Double> meetingPoint) {
+    public void setMeetingPoint(GeoPoint meetingPoint) {
         this.meetingPoint = meetingPoint;
     }
 
-
-    public List<HashMap<String, Double>> getRouteWalking() {
+    public List<GeoPoint> getRouteWalking() {
         return routeWalking;
     }
 
-    public void setRouteWalking(List<HashMap<String, Double>> routeWalking) {
+    public void setRouteWalking(List<GeoPoint> routeWalking) {
         this.routeWalking = routeWalking;
     }
 
