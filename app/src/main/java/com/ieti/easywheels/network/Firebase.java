@@ -179,8 +179,6 @@ public class Firebase {
                             if (response.isSuccessful()) {
                                 String geoHash = response.body();
                                 tripRequest.setGeoHash(geoHash);
-                                System.out.println("GEO  HASH");
-                                System.out.println(geoHash);
                                 matchPassengerWithDriver(tripRequest);
                             }
                         } catch (IOException e) {
@@ -272,6 +270,9 @@ public class Firebase {
                         trip.setPassengers(passengersTrip);
                         trip.setPassengersWithInfo(passengersWithInfo);
 
+                        if(trip.getAvailableSeats() >= trip.getPassengers().size()){
+                            trip.setFull(true);
+                        }
                         addPassengersToTrip(trip, updatedPassengers);
 //                        Todo call callback function to MapActivity and do UI stuff
 
@@ -288,38 +289,34 @@ public class Firebase {
     }
 
     private static void matchPassengerWithDriver(final TripRequest tripRequest) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Response<Object> response = RetrofitConnection.getCloudFunctionsService().matchPassengerWithDriver(tripRequest).execute();
-                    System.out.println(response);
-                    if (response.isSuccessful() && response.code() == 200) {
-                        LinkedTreeMap<Object, Object> treeMap = (LinkedTreeMap<Object, Object>) response.body();
-                        Trip trip = AdapterUtils.convertLinkedTreeMapToTrip(treeMap);
-                        tripRequest.setMeetingPoint(trip.getMeetingPoint());
-                        LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
 
-                        TripRequest passenger = updateTripRequestWhenMatch(tripRequest, trip.getDepartureDate(), driverDeparturePoint);
-                        // Todo call callback function to MapActivity and do UI stuff
+        try {
+            Response<Object> response = RetrofitConnection.getCloudFunctionsService().matchPassengerWithDriver(tripRequest).execute();
+            if (response.isSuccessful() && response.code() == 200) {
+                LinkedTreeMap<Object, Object> treeMap = (LinkedTreeMap<Object, Object>) response.body();
+                Trip trip = AdapterUtils.convertLinkedTreeMapToTrip(treeMap);
+                tripRequest.setMeetingPoint(trip.getMeetingPoint());
+                LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
 
-                        Boolean full = false;
-                        if (trip.getPassengers() != null) {
-                            full = trip.getAvailableSeats() == trip.getPassengers().size() + 1;
-                        }
-                        trip.setFull(full);
+                TripRequest passenger = updateTripRequestWhenMatch(tripRequest, trip.getDepartureDate(), driverDeparturePoint);
+                // Todo call callback function to MapActivity and do UI stuff
 
-
-                        addPassengerToTrip(trip, tripRequest);
-
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
+                Boolean full = trip.getAvailableSeats() <= 1;
+                if (trip.getPassengers() != null) {
+                    full = trip.getAvailableSeats() == trip.getPassengers().size() + 1;
                 }
+                trip.setFull(full);
+
+
+                addPassengerToTrip(trip, tripRequest);
+
             }
-        });
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
     }
 
     //Sync function DO NOT Call it in Main Thread
