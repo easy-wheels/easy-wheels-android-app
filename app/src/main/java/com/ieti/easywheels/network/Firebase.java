@@ -295,14 +295,12 @@ public class Firebase {
                         trip.setPassengers(passengersTrip);
                         trip.setPassengersWithInfo(passengersWithInfo);
 
-                        if(trip.getAvailableSeats() >= trip.getPassengers().size()){
+                        if(trip.getAvailableSeats() <= trip.getPassengers().size()){
                             trip.setFull(true);
                         }
                         addPassengersToTrip(trip, updatedPassengers);
-//                        Todo call callback function to MapActivity and do UI stuff
 
-                    } else {
-//                        const message = "No hemos encontrado pasajeros cerca a tu ruta, pero te informaremos cuando los haya";
+
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -325,14 +323,12 @@ public class Firebase {
                 LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
 
                 TripRequest passenger = updateTripRequestWhenMatch(tripRequest, trip.getDepartureDate(), driverDeparturePoint);
-                // Todo call callback function to MapActivity and do UI stuff
 
-                Boolean full = trip.getAvailableSeats() <= 1;
+                boolean full = trip.getAvailableSeats() <= 1;
                 if (trip.getPassengers() != null) {
-                    full = trip.getAvailableSeats() == trip.getPassengers().size() + 1;
+                    full = trip.getAvailableSeats() <= trip.getPassengers().size() + 1;
                 }
                 trip.setFull(full);
-
 
                 addPassengerToTrip(trip, tripRequest);
 
