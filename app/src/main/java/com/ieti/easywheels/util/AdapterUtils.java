@@ -65,6 +65,8 @@ public class AdapterUtils {
 
         trip.setHour(treeMap.get("hour").toString());
 
+        trip.setPassengers((List<String>) treeMap.get("passengers"));
+
         List<LinkedTreeMap<Object, Object>> route = (List<LinkedTreeMap<Object, Object>>) treeMap.get("route");
         List<GeoPoint> geoPoints = new ArrayList<>();
         for (LinkedTreeMap<Object, Object> pos : route) {
