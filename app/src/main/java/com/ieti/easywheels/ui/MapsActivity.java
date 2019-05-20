@@ -38,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -160,7 +161,7 @@ public class MapsActivity extends AppCompatActivity implements
 
         confirmationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(getCurrentFocus()!=null) {
+                if (getCurrentFocus() != null) {
                     Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
                             .show();
                 }
@@ -377,9 +378,8 @@ public class MapsActivity extends AppCompatActivity implements
             updateLocationUI();
         }
         mUniversityMarker = mMap.addMarker(new MarkerOptions()
-                        .position(mUniversityLocation)
-                        .title(getString(R.string.university_position_marker_title))
-//                                    .icon()
+                .position(mUniversityLocation)
+                .title(getString(R.string.university_position_marker_title))
         );
 
     }
@@ -451,10 +451,10 @@ public class MapsActivity extends AppCompatActivity implements
                         if (mUserMarker == null) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
                             mUserMarker = mMap.addMarker(new MarkerOptions()
-                                            .position(position)
-                                            .draggable(true)
-                                            .title(getString(R.string.user_position_marker_title))
-//                                    .icon()
+                                    .position(position)
+                                    .draggable(true)
+                                    .title(getString(R.string.user_position_marker_title))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                             );
                         } else {
                             moveMarker(mUserMarker, position, false);
@@ -462,7 +462,7 @@ public class MapsActivity extends AppCompatActivity implements
                         }
 
                         mUserMarker.showInfoWindow();
-                        if(isDriver){
+                        if (isDriver) {
                             drawPolyLine();
                         }
                     }
@@ -494,7 +494,7 @@ public class MapsActivity extends AppCompatActivity implements
                     polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                     polyline.setColor(ContextCompat.getColor(MapsActivity.this, R.color.colorAccent));
                     polyline.setClickable(true);
-                }else{
+                } else {
                     polyline.setPoints(newDecodedPath);
                 }
             }
@@ -552,7 +552,7 @@ public class MapsActivity extends AppCompatActivity implements
             public void run() {
                 Date arrivalDate, departureDate;
                 Date dateUniversity = DateUtils.getNextDateFromDayAndHour(day, hour);
-                if(route==null){
+                if (route == null) {
                     drawPolyLine();
                 }
                 if (toUniversity) {
@@ -612,8 +612,8 @@ public class MapsActivity extends AppCompatActivity implements
         return null;
     }
 
-    private void drawPolyLine(){
-        if(getCurrentFocus()!=null) {
+    private void drawPolyLine() {
+        if (getCurrentFocus() != null) {
             Snackbar.make(getCurrentFocus(), R.string.wait, Snackbar.LENGTH_SHORT)
                     .show();
         }
@@ -671,7 +671,6 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
 
-
     @Override
     public void onLocationChanged(Location location) {
         locationManager.removeUpdates(this);
@@ -712,7 +711,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
-        if(isDriver){
+        if (isDriver) {
             drawPolyLine();
         }
         Geocoder geocoder;
@@ -737,7 +736,7 @@ public class MapsActivity extends AppCompatActivity implements
         builder1.setNegativeButton("Ok",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Intent intent = new Intent(getApplicationContext(),LaunchActivity.class);
+                        Intent intent = new Intent(getApplicationContext(), LaunchActivity.class);
                         startActivity(intent);
                         finish();
                         return;

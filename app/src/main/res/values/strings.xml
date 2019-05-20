@@ -89,7 +89,7 @@
     <string name="capacity_text_type_step">Con cuantos cupos cuentas?</string>
     <string name="user_position_marker_title">Arrastra a la ubicación deseada</string>
     <string name="searchBox_hint_toU_as_driver">Desde donde sales?</string>
-    <string name="searchBox_hint_toU_as_passenger">Cual deseas que sea tu area de recogida?</string>
+    <string name="searchBox_hint_toU_as_passenger">Donde quieres que te recojan?</string>
     <string name="searchBox_hint_fromU">Cual es tu lugar de destino?</string>
     <string name="university_position_marker_title">Escuela Colombiana de ingenieria Julio Garavito</string>
     <string name="query_realize">¡Realizado!</string>
@@ -99,6 +99,8 @@
     <string name="your_location">Tu ubicacion</string>
     <string name="departure">Salida</string>
     <string name="walk_to_here">Camina hasta aqui</string>
+    <string name="driver">Conductor</string>
+    <string name="passenger">Pasajero</string>
 
 
 </resources>

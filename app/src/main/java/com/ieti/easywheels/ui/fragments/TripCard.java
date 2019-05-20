@@ -20,6 +20,9 @@ import com.ieti.easywheels.model.TripRequest;
 import com.ieti.easywheels.ui.TripInfoActivity;
 import com.ieti.easywheels.util.MemoryUtil;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -95,8 +98,9 @@ public class TripCard extends Fragment {
     }
 
     private void configureTrip(){
-        textModalityAndDate.setText("Conductor - "+trip.getDay()+" "+trip.getHour());
-        textinfoDate.setText("Fecha de salida: "+trip.getDepartureDate().toString().substring(0,20));
+        textModalityAndDate.setText("Conductor - "+trip.dayInSpanish()+" "+trip.getHour());
+        SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM 'del' yyyy 'a las' HH:mm", new Locale("es","CO"));
+        textinfoDate.setText("Fecha de salida: "+ format.format(trip.getDepartureDate()));
         System.out.println(trip);
         if(trip.getPassengers()==null){
             textInfo.setText("Quedan " + (trip.getAvailableSeats()) + " cupos");
@@ -113,11 +117,11 @@ public class TripCard extends Fragment {
     }
 
     private void configureTripRequest(){
-        textModalityAndDate.setText("Pasajero - "+tripRequest.getDay()+" "+tripRequest.getHour());
-
+        textModalityAndDate.setText("Pasajero - "+tripRequest.dayInSpanish()+" "+tripRequest.getHour());
+        SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM 'del' yyyy 'a las' HH:mm", new Locale("es","CO"));
         if(tripRequest.getMatched()){
             textInfo.setText("¡Se ha encontrado un viaje!");
-            textinfoDate.setText("Fecha de salida: "+tripRequest.getDepartureDate().toString().substring(0,20));
+            textinfoDate.setText("Fecha de salida: "+ format.format(tripRequest.getDepartureDate()));
             textInfo.setTextColor(Color.BLACK);
         }else{
             textInfo.setText("Pendiente");

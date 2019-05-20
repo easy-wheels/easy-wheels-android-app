@@ -152,4 +152,21 @@ public class TripRequest {
                 ", routeWalking=" + routeWalking +
                 '}';
     }
+
+    public String dayInSpanish(){
+        switch(day){
+            case "Monday":
+                return "Lunes";
+            case "Tuesday":
+                return "Martes";
+            case "Wednesday":
+                return "Miércoles";
+            case "Thursday":
+                return "Jueves";
+            case "Friday":
+                return "Viernes";
+            default:
+                return "Sábado";
+        }
+    }
 }

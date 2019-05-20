@@ -320,6 +320,7 @@ public class Firebase {
             if (response.isSuccessful() && response.code() == 200) {
                 LinkedTreeMap<Object, Object> treeMap = (LinkedTreeMap<Object, Object>) response.body();
                 Trip trip = AdapterUtils.convertLinkedTreeMapToTrip(treeMap);
+
                 tripRequest.setMeetingPoint(trip.getMeetingPoint());
                 LatLng driverDeparturePoint = AdapterUtils.convertGeoPointToLatLng(trip.getRoute().get(0));
 
@@ -339,6 +340,8 @@ public class Firebase {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (java.lang.ClassCastException e){
             e.printStackTrace();
         }
 
