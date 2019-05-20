@@ -37,6 +37,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -53,13 +54,18 @@ import com.google.maps.model.DirectionsLeg;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.ieti.easywheels.R;
+import com.ieti.easywheels.model.PassengerInfo;
 import com.ieti.easywheels.model.Trip;
 import com.ieti.easywheels.model.TripRequest;
 import com.ieti.easywheels.network.Firebase;
+import com.ieti.easywheels.util.AdapterUtils;
 import com.ieti.easywheels.util.MemoryUtil;
+import com.ieti.easywheels.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -107,7 +113,6 @@ public class TripInfoActivity extends AppCompatActivity implements
     private PlacesClient mPlacesClient;
 
 
-
     private Marker mUserMarker;
 
     // Keys for storing activity state.
@@ -138,7 +143,7 @@ public class TripInfoActivity extends AppCompatActivity implements
 
         //Else
 
-        Toolbar mToolbar =  findViewById(R.id.toolbarTripInfo);
+        Toolbar mToolbar = findViewById(R.id.toolbarTripInfo);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -152,29 +157,29 @@ public class TripInfoActivity extends AppCompatActivity implements
         toUniversityTripInfo = findViewById(R.id.toUniversity_trip_info);
         infoTripInfo = findViewById(R.id.info_trip_info);
         infoDepartureTripInfo = findViewById(R.id.info_departure_trip_info);
-        if(MemoryUtil.TRIP!=null){
+        if (MemoryUtil.TRIP != null) {
             setTripInfo();
         }
-        if(MemoryUtil.TRIPREQUEST!=null){
+        if (MemoryUtil.TRIPREQUEST != null) {
             setTripRequestInfo();
         }
 
 
     }
 
-    private void setTripInfo(){
+    private void setTripInfo() {
         trip = MemoryUtil.TRIP;
-        rolTripInfo.setText("Conductor");
-        dateTripInfo.setText(trip.getDay()+" "+trip.getHour());
-        if(trip.getToUniversity()){
+        rolTripInfo.setText(getString(R.string.driver));
+        dateTripInfo.setText(trip.dayInSpanish() + " " + trip.getHour());
+        if (trip.getToUniversity()) {
             toUniversityTripInfo.setText("Hacia la universidad");
-        }else{
+        } else {
             toUniversityTripInfo.setText("Desde la universidad");
         }
-        if(trip.getPassengers()==null){
+        if (trip.getPassengers() == null) {
             infoTripInfo.setText("Quedan " + (trip.getAvailableSeats()) + " cupos");
             infoTripInfo.setTextColor(Color.DKGRAY);
-        }else {
+        } else {
             if (trip.getAvailableSeats() - trip.getPassengers().size() == 0) {
                 infoTripInfo.setText("¡El carro se lleno!");
                 infoTripInfo.setTextColor(Color.BLACK);
@@ -183,29 +188,31 @@ public class TripInfoActivity extends AppCompatActivity implements
                 infoTripInfo.setTextColor(Color.DKGRAY);
             }
         }
-        infoDepartureTripInfo.setText("Fecha de salida: "+trip.getDepartureDate().toString().substring(0,20));
+        SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM 'del' yyyy 'a las' HH:mm", new Locale("es", "CO"));
+        infoDepartureTripInfo.setText("Fecha de salida: " + format.format(trip.getDepartureDate()));
     }
 
-    private void setTripRequestInfo(){
+    private void setTripRequestInfo() {
         tripRequest = MemoryUtil.TRIPREQUEST;
-        rolTripInfo.setText("Pasajero");
-        dateTripInfo.setText(tripRequest.getDay()+" "+tripRequest.getHour());
-        if(tripRequest.getToUniversity()){
+        rolTripInfo.setText(getString(R.string.passenger));
+        dateTripInfo.setText(tripRequest.dayInSpanish() + " " + tripRequest.getHour());
+        if (tripRequest.getToUniversity()) {
             toUniversityTripInfo.setText("Hacia la universidad");
-        }else{
+        } else {
             toUniversityTripInfo.setText("Desde la universidad");
         }
-        if(tripRequest.getMatched()){
+        if (tripRequest.getMatched()) {
+            SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM 'del' yyyy 'a las' HH:mm", new Locale("es", "CO"));
             infoTripInfo.setText("¡Se ha encontrado un viaje!");
-            infoDepartureTripInfo.setText("Fecha de salida: "+tripRequest.getDepartureDate().toString().substring(0,20));
+            infoDepartureTripInfo.setText("Fecha de salida: " + format.format(tripRequest.getDepartureDate()));
             infoTripInfo.setTextColor(Color.BLACK);
-        }else{
+        } else {
             infoTripInfo.setText("Pendiente");
             infoTripInfo.setTextColor(Color.DKGRAY);
         }
     }
 
-    private void setIndependentTexts(){
+    private void setIndependentTexts() {
 
     }
 
@@ -241,9 +248,8 @@ public class TripInfoActivity extends AppCompatActivity implements
             updateLocationUI();
         }
         mUniversityMarker = mMap.addMarker(new MarkerOptions()
-                        .position(mUniversityLocation)
-                        .title(getString(R.string.university_position_marker_title))
-//                                    .icon()
+                .position(mUniversityLocation)
+                .title(getString(R.string.university_position_marker_title))
         );
     }
 
@@ -304,35 +310,23 @@ public class TripInfoActivity extends AppCompatActivity implements
                             mLastKnownLocation = location;
                             position = new LatLng(location.getLatitude(), location.getLongitude());
                             mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                            mMap.setMyLocationEnabled(true);
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
+                            mMap.setMyLocationEnabled(false);
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                             position = mUniversityLocation;
                             getGpsLocation();
                         }
-                        if (mUserMarker == null) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
-                            mUserMarker = mMap.addMarker(new MarkerOptions()
-                                            .position(position)
-                                            .draggable(false)
-                                            .title(getString(R.string.your_location))
-//                                    .icon()
-                            );
-                        } else {
-                            moveMarker(mUserMarker, position, false);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
-                        }
 
-                        mUserMarker.showInfoWindow();
-
-                        if(trip!=null){
+                        if (trip != null) {
                             driverDrawLineAndInfo();
                         }
-                        if(tripRequest!=null){
+                        if (tripRequest != null) {
                             passengerDrawLineAndInfo();
                         }
                         //if(isDriver){
-                         //   drawPolyLine();
+                        //   drawPolyLine();
                         //}
                     }
                 });
@@ -367,6 +361,7 @@ public class TripInfoActivity extends AppCompatActivity implements
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Necesitamos saber donde estas para ubicarte en el mapa, deseas habilitar el GPS?")
@@ -454,7 +449,7 @@ public class TripInfoActivity extends AppCompatActivity implements
                     polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                     polyline.setColor(ContextCompat.getColor(TripInfoActivity.this, R.color.colorAccent));
                     polyline.setClickable(true);
-                }else{
+                } else {
                     polyline.setPoints(newDecodedPath);
                 }
             }
@@ -462,49 +457,46 @@ public class TripInfoActivity extends AppCompatActivity implements
     }
 
     //GOOGLE API with INFO
-    private void driverDrawLineAndInfo(){
-        //private final LatLng mUniversityLocation = new LatLng(4.782715, -74.042611);
+    private void driverDrawLineAndInfo() {
+        LatLng position = new LatLng(trip.getRoute().get(0).getLatitude(), trip.getRoute().get(0).getLongitude());
         mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(trip.getRoute().get(0).getLatitude(), trip.getRoute().get(0).getLongitude()))
+                .position(position)
                 .draggable(false)
-                .title(getString(R.string.departure)));
+                .title(getString(R.string.departure))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+        );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
         List<LatLng> newDecodedPath = new ArrayList<>();
-        for(GeoPoint geoPoint:trip.getRoute()){
+        for (GeoPoint geoPoint : trip.getRoute()) {
             newDecodedPath.add(new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude()));
         }
         if (polyline == null) {
             polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
             polyline.setColor(ContextCompat.getColor(TripInfoActivity.this, R.color.colorAccent));
             polyline.setClickable(true);
-        }else{
+        } else {
             polyline.setPoints(newDecodedPath);
         }
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                final List<String> names = new ArrayList<>();
-
                 System.out.println(trip.getPassengers());
-                if(trip.getPassengers()!=null){
-                    if(trip.getPassengers().size()>0) {
-                        for (int i = 0; i < trip.getPassengers().size(); i++) {
-
-                            names.add(Firebase.getNameByEmail(trip.getPassengers().get(i)));
-                        }
-                    }
-                }
-
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
-                        System.out.println(names);
-                        for(int i = 0;i<names.size();i++){
-                            mMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(trip.getPassengersWithInfo().get(i).getMeetingPoint().getLatitude(), trip.getPassengersWithInfo().get(i).getMeetingPoint().getLongitude()))
-                                    .draggable(false)
-                                    .title(names.get(i)));
+                        if (trip.getPassengersWithInfo() != null && trip.getPassengersWithInfo().size() > 0) {
+                            SimpleDateFormat format = new SimpleDateFormat("EEEE dd 'a las' HH:mm", new Locale("es","CO"));
+                            for (PassengerInfo passenger : trip.getPassengersWithInfo()) {
+                                String name = StringUtils.getNameFromEmail(passenger.getPassengerEmail());
+                                String snippet = "Recoger el " + format.format(passenger.getMeetingDate());
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(AdapterUtils.convertGeoPointToLatLng(passenger.getMeetingPoint()))
+                                        .title(name)
+                                        .snippet(snippet)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                                );
+                            }
                         }
                         getWindow().getDecorView().invalidate();
                     }
@@ -514,28 +506,42 @@ public class TripInfoActivity extends AppCompatActivity implements
 
     }
 
-    private void passengerDrawLineAndInfo(){
-        if(tripRequest.getMatched()){
+    private void passengerDrawLineAndInfo() {
+        if (tripRequest.getMatched()) {
             List<LatLng> newDecodedPath = new ArrayList<>();
-            for(GeoPoint geoPoint:tripRequest.getRouteWalking()){
+            for (GeoPoint geoPoint : tripRequest.getRouteWalking()) {
                 newDecodedPath.add(new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude()));
             }
             if (polyline == null) {
                 polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                 polyline.setColor(ContextCompat.getColor(TripInfoActivity.this, R.color.colorAccent));
                 polyline.setClickable(true);
-            }else{
+            } else {
                 polyline.setPoints(newDecodedPath);
             }
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(tripRequest.getMeetingPoint().getLatitude(), tripRequest.getMeetingPoint().getLongitude()))
+            LatLng position = new LatLng(tripRequest.getMeetingPoint().getLatitude(), tripRequest.getMeetingPoint().getLongitude());
+            Marker destiny = mMap.addMarker(new MarkerOptions()
+                    .position(position)
                     .draggable(false)
-                    .title(getString(R.string.walk_to_here)));
-        }else{
+                    .title(getString(R.string.walk_to_here))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+            );
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+            destiny.showInfoWindow();
+
             mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(tripRequest.getUserPosition().getLatitude(), tripRequest.getUserPosition().getLongitude()))
+                    .position(new LatLng(tripRequest.getRouteWalking().get(0).getLatitude(), tripRequest.getRouteWalking().get(0).getLongitude()))
                     .draggable(false)
                     .title(getString(R.string.departure)));
+        } else {
+            LatLng position = new LatLng(tripRequest.getUserPosition().getLatitude(), tripRequest.getUserPosition().getLongitude());
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(position)
+                    .draggable(false)
+                    .title(getString(R.string.departure))
+            );
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+            marker.showInfoWindow();
         }
     }
 

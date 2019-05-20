@@ -46,7 +46,7 @@ public class AdapterUtils {
         date.setTime(seconds.longValue() * 1000);
         trip.setArrivalDate(date);
 
-        Integer availableSeats = Integer.valueOf((String) treeMap.get("availableSeats"));
+        Integer availableSeats = ((Double) treeMap.get("availableSeats")).intValue();
         trip.setAvailableSeats(availableSeats);
 
         trip.setDay(treeMap.get("day").toString());
